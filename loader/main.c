@@ -1,10 +1,10 @@
 /*
  * main.c
  *
- * ARMv6 Shared Libraries loader. Galaxy on Fire 2 edition
+ * ARMv7 Shared Libraries loader. Backstab HD edition
  *
  * Copyright (C) 2021 Andy Nguyen
- * Copyright (C) 2021-2022 Rinnegatamante
+ * Copyright (C) 2021-2023 Rinnegatamante
  * Copyright (C) 2022-2023 Volodymyr Atamanenko
  *
  * This software may be modified and distributed under the terms
@@ -17,100 +17,63 @@
 
 #include <psp2/kernel/threadmgr.h>
 
-#include <AFakeNative/AFakeNative.h>
 #include <FalsoJNI/FalsoJNI.h>
 #include <so_util/so_util.h>
 
-int _newlib_heap_size_user = 246 * 1024 * 1024;
+int _newlib_heap_size_user = 220 * 1024 * 1024;
 
 so_module so_mod;
 
-// Reimplemented from classes.dex, needed for setting the default language
-void setCountry();
 
 int main(int argc, char* argv[]) {
     soloader_init_all();
 
-    int (*JNI_OnLoad)(JavaVM* jvm) = (void*)so_symbol(&so_mod,"JNI_OnLoad");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize)(void *env, void *obj, int width, int height) = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit)(void *env, void *obj, int manufacturer, int width, int height, char *version) = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender)() = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender");
 
-    void (*setAPKPath)(JNIEnv *env, void *unused, jstring apk_path) = (void*)so_symbol(&so_mod, "Java_net_fishlabs_GalaxyonFire2_GOF2NA_setAPKPath");
-    void (*SetDirectory)(JNIEnv *env, void *unused, jstring data_directory) = (void*)so_symbol(&so_mod, "Java_net_fishlabs_GalaxyonFire2_GOF2NA_SetDirectory");
-    void (*KeyBoardState)(JNIEnv *env, void *unused, int state) = (void*)so_symbol(&so_mod, "Java_net_fishlabs_GalaxyonFire2_GOF2NA_KeyBoardState");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit)() = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit");
+    
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch)(void *env, void *obj, int action, int x, int y, int index) = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch");
+    
+    printf("nativeInit %x\n", Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit);
+    Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit(fake_env, NULL, 0, SCREEN_W, SCREEN_H, "1.0");
+    printf("nativeResize\n");
+    Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize(fake_env, NULL, SCREEN_W, SCREEN_H);
+    
+    printf("nativeInit2\n");
+    Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit();
 
-    int (*ANativeActivity_onCreate)(ANativeActivity* activity) = (void*)so_symbol(&so_mod,"ANativeActivity_onCreate");
+    int lastX[2] = { -1, -1 };
+    int lastY[2] = { -1, -1 };
 
-    JNI_OnLoad(&jvm);
-    log_info("JNI_OnLoad() passed");
+    while (1) {
+        SceTouchData touch;
+        sceTouchPeek(SCE_TOUCH_PORT_FRONT, &touch, 1);
 
-    setAPKPath(&jni, NULL, APK_PATH);
-    log_info("setAPKPath() passed");
+        for (int i = 0; i < 2; i++) {
+            if (i < touch.reportNum) {
+                int x = (int)((float)touch.report[i].x * (float)SCREEN_W / 1920.0f);
+                int y = (int)((float)touch.report[i].y * (float)SCREEN_H / 1088.0f);
 
-    SetDirectory(&jni, NULL, DATA_PATH);
-    log_info("SetDirectory() passed");
-
-    setCountry();
-    log_info("setCountry() passed");
-
-    ANativeActivity * activity = ANativeActivity_create();
-    ANativeActivity_onCreate(activity);
-    log_info("ANativeActivity_onCreate() passed");
-
-    activity->callbacks->onStart(activity);
-    log_info("onStart() passed");
-
-    AInputQueue * aInputQueue = AInputQueue_create();
-    activity->callbacks->onInputQueueCreated(activity, aInputQueue);
-    log_info("onInputQueueCreated() passed");
-
-    if (setting_physicalControlsEnabled)
-        KeyBoardState(&jni, NULL, 1);
-
-    ANativeWindow * aNativeWindow = ANativeWindow_create();
-    activity->callbacks->onNativeWindowCreated(activity, aNativeWindow);
-    log_info("onNativeWindowCreated() passed");
+                if (lastX[i] == -1 || lastY[i] == -1)
+                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(fake_env, NULL, 1, x, y, i);
+                else if (lastX[i] != x || lastY[i] != y)
+                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(fake_env, NULL, 2, x, y, i);
+                lastX[i] = x;
+                lastY[i] = y;
+            } else {
+                if (lastX[i] != -1 || lastY[i] != -1)
+                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(fake_env, NULL, 0, lastX[i], lastY[i], i);
+                lastX[i] = -1;
+                lastY[i] = -1;
+            }
+        }
+    
+        printf("nativeRender\n");
+        Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender();
+        vglSwapBuffers(GL_FALSE);
+    }
 
     sceKernelExitDeleteThread(0);
-}
-
-#include <psp2/apputil.h>
-#include <psp2/system_param.h>
-
-void setCountry() {
-    void (*setCountryCodeOfDevice)(JNIEnv *env, void *unused, jint countryCode) = (void *) so_symbol(&so_mod, "Java_net_fishlabs_GalaxyonFire2_GOF2NA_setCountryCodeOfDevice");
-
-    int lang = -1;
-    sceAppUtilSystemParamGetInt(SCE_SYSTEM_PARAM_ID_LANG, &lang);
-    switch (lang) {
-        case SCE_SYSTEM_PARAM_LANG_ITALIAN:
-            setCountryCodeOfDevice(&jni, NULL, 3);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_GERMAN:
-            setCountryCodeOfDevice(&jni, NULL, 1);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_KOREAN:
-            setCountryCodeOfDevice(&jni, NULL, 14);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_JAPANESE:
-            setCountryCodeOfDevice(&jni, NULL, 15);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_PORTUGUESE_PT:
-        case SCE_SYSTEM_PARAM_LANG_PORTUGUESE_BR:
-            setCountryCodeOfDevice(&jni, NULL, 7);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_SPANISH:
-            setCountryCodeOfDevice(&jni, NULL, 4);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_FRENCH:
-            setCountryCodeOfDevice(&jni, NULL, 2);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_POLISH:
-            setCountryCodeOfDevice(&jni, NULL, 6);
-            break;
-        case SCE_SYSTEM_PARAM_LANG_RUSSIAN:
-            setCountryCodeOfDevice(&jni, NULL, 5);
-            break;
-        default:
-            setCountryCodeOfDevice(&jni, NULL, 0);
-            break;
-    }
 }

@@ -107,8 +107,16 @@ int readdir_r_soloader(DIR *dirp, dirent64_bionic *entry, dirent64_bionic **resu
 }
 
 FILE *fopen_soloader(char *fname, char *mode) {
-    FILE* ret =  fopen(fname, mode);
-    logv_debug("[io] fopen(%s): 0x%x", fname, ret);
+    char new_path[1024];
+    if (strncmp(fname, "/sdcard", 7) == 0) {
+        snprintf(new_path, sizeof(new_path), "%s%s", DATA_PATH, fname + 7);
+        fname = new_path;
+    } else {
+        snprintf(new_path, sizeof(new_path), "%s", fname);
+    }
+
+    FILE* ret = fopen(new_path, mode);
+    logv_debug("[io] fopen(%s): 0x%x", new_path, ret);
     return ret;
 }
 
