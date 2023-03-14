@@ -105,6 +105,8 @@ int pthread_attr_setstack_soloader(pthread_attr_t **attr,
 int pthread_attr_setschedparam_soloader(pthread_attr_t **attr,
                                         const struct sched_param *param);
 
+int pthread_once_soloader(volatile int *once_control, void (*init_routine) (void));
+
 int sem_destroy_soloader(int * sem);
 
 int sem_getvalue_soloader (int * sem, int * sval);

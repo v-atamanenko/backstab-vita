@@ -24,22 +24,26 @@ int _newlib_heap_size_user = 220 * 1024 * 1024;
 
 so_module so_mod;
 
+#define SCREEN_W 960
+#define SCREEN_H 544
+
+#include <psp2/touch.h> 
 
 int main(int argc, char* argv[]) {
     soloader_init_all();
 
-    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize)(void *env, void *obj, int width, int height) = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize");
-    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit)(void *env, void *obj, int manufacturer, int width, int height, char *version) = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit");
-    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender)() = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize)(void *env, void *obj, int width, int height) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit)(void *env, void *obj, int manufacturer, int width, int height, char *version) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender)() = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender");
 
-    int (* Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit)() = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit)() = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit");
     
-    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch)(void *env, void *obj, int action, int x, int y, int index) = (void *)so_symbol(&backstab_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch");
+    int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch)(void *env, void *obj, int action, int x, int y, int index) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch");
     
     printf("nativeInit %x\n", Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit);
-    Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit(fake_env, NULL, 0, SCREEN_W, SCREEN_H, "1.0");
+    Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit(&jni, NULL, 0, SCREEN_W, SCREEN_H, "1.0");
     printf("nativeResize\n");
-    Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize(fake_env, NULL, SCREEN_W, SCREEN_H);
+    Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize(&jni, NULL, SCREEN_W, SCREEN_H);
     
     printf("nativeInit2\n");
     Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit();
@@ -57,14 +61,14 @@ int main(int argc, char* argv[]) {
                 int y = (int)((float)touch.report[i].y * (float)SCREEN_H / 1088.0f);
 
                 if (lastX[i] == -1 || lastY[i] == -1)
-                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(fake_env, NULL, 1, x, y, i);
+                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(&jni, NULL, 1, x, y, i);
                 else if (lastX[i] != x || lastY[i] != y)
-                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(fake_env, NULL, 2, x, y, i);
+                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(&jni, NULL, 2, x, y, i);
                 lastX[i] = x;
                 lastY[i] = y;
             } else {
                 if (lastX[i] != -1 || lastY[i] != -1)
-                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(fake_env, NULL, 0, lastX[i], lastY[i], i);
+                    Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch(&jni, NULL, 0, lastX[i], lastY[i], i);
                 lastX[i] = -1;
                 lastY[i] = -1;
             }
@@ -72,7 +76,7 @@ int main(int argc, char* argv[]) {
     
         printf("nativeRender\n");
         Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender();
-        vglSwapBuffers(GL_FALSE);
+        vglSwapBuffers(0);
     }
 
     sceKernelExitDeleteThread(0);

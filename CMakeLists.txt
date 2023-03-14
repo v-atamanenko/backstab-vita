@@ -13,9 +13,9 @@ project(so_loader C CXX)
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
 # Vita application configuration
-set(VITA_APP_NAME "Galaxy on Fire 2")
-set(VITA_TITLEID "GALAXYOF2")
-set(VITA_VPKNAME "GalaxyOnFire2")
+set(VITA_APP_NAME "Backstab HD")
+set(VITA_TITLEID "BACKSTAB0")
+set(VITA_VPKNAME "BackstabHD")
 set(VITA_VERSION "01.00")
 set(VITA_MKSFOEX_FLAGS "-d ATTRIBUTE2=12")
 
@@ -24,9 +24,8 @@ set(PSVITAIP "192.168.1.98" CACHE STRING "PSVita IP (for FTP access)")
 set(PARSECOREPATH "$ENV{PARSECOREPATH}" CACHE STRING "vita-parse-core main.py")
 
 # Game-specific definitions
-set(DATA_PATH "ux0:data/gof2/" CACHE STRING "Path to data (with trailing /)")
-set(SO_PATH "lib/armeabi/libgof2.so" CACHE STRING "Path to .so")
-set(APK_PATH "${DATA_PATH}GalaxyOnFire.apk" CACHE STRING "Path to .apk")
+set(DATA_PATH "ux0:data/backstab/" CACHE STRING "Path to data (with trailing /)")
+set(SO_PATH "${DATA_PATH}libPirates.so" CACHE STRING "Path to .so")
 
 add_definitions(-DDATA_PATH="${DATA_PATH}"
                 -DDATA_PATH_INT="${DATA_PATH_INT}"
@@ -62,23 +61,13 @@ add_executable(${CMAKE_PROJECT_NAME}
                loader/utils/logger.c
                loader/utils/settings.c
                loader/utils/utils.c
-               loader/AFakeNative/ALooper.cpp
                lib/FalsoJNI/FalsoJNI.c
                lib/FalsoJNI/FalsoJNI_ImplBridge.c
                lib/FalsoJNI/FalsoJNI_Logger.c
                lib/sha1/sha1.c
                lib/so_util/so_util.c
                lib/unzip/unzip.c
-               lib/unzip/ioapi.c
-               loader/AFakeNative/PseudoEpoll.cpp
-               loader/AFakeNative/AFakeNative_Utils.cpp
-               loader/AFakeNative/ANativeWindow.cpp
-               loader/AFakeNative/ASensor.cpp
-               loader/AFakeNative/AConfiguration.cpp
-               loader/AFakeNative/AInput.cpp
-               loader/AFakeNative/utils/controls.cpp
-               loader/AFakeNative/utils/sensors.cpp
-               loader/AFakeNative/ANativeActivity.cpp)
+               lib/unzip/ioapi.c)
 
 target_include_directories(${CMAKE_PROJECT_NAME} SYSTEM
                            PUBLIC ${CMAKE_SOURCE_DIR}/lib
@@ -127,38 +116,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
                       SceVshBridge_stub
                       )
 
-add_executable(configurator
-               loader/configurator/main.cpp
-               loader/utils/settings.c
-               )
-
-target_include_directories(configurator SYSTEM
-                           PUBLIC ${CMAKE_SOURCE_DIR}/lib
-                           )
-
-target_link_libraries(configurator
-                      imgui
-                      vitaGL
-                      vitashark
-                      SceShaccCgExt
-                      m
-                      mathneon
-                      taihen_stub
-                      SceAppMgr_stub
-                      SceAudio_stub
-                      SceCtrl_stub
-                      SceCommonDialog_stub
-                      SceDisplay_stub
-                      SceKernelDmacMgr_stub
-                      SceGxm_stub
-                      SceShaccCg_stub
-                      SceSysmodule_stub
-                      SceTouch_stub
-                      SceVshBridge_stub
-                      )
-
-vita_create_self(configurator.bin configurator UNSAFE)
-
 vita_create_self(eboot.bin ${CMAKE_PROJECT_NAME} UNSAFE)
 vita_create_vpk(${VITA_VPKNAME}.vpk ${VITA_TITLEID} eboot.bin
                 VERSION ${VITA_VERSION}
@@ -169,10 +126,6 @@ vita_create_vpk(${VITA_VPKNAME}.vpk ${VITA_TITLEID} eboot.bin
                 ${CMAKE_SOURCE_DIR}/livearea/bg0.png sce_sys/livearea/contents/bg0.png
                 ${CMAKE_SOURCE_DIR}/livearea/template.xml sce_sys/livearea/contents/template.xml
                 ${CMAKE_SOURCE_DIR}/shaders/gxp shaders
-                ${CMAKE_SOURCE_DIR}/loader/configurator/configurator-bg.png configurator-bg.png
-                ${CMAKE_SOURCE_DIR}/loader/configurator/SourceSansPro-Regular.ttf SourceSansPro-Regular.ttf
-                ${CMAKE_BINARY_DIR}/configurator.bin configurator.bin
-                ${CMAKE_SOURCE_DIR}/patch patch
                 )
 
 add_custom_target(send

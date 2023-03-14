@@ -19,6 +19,7 @@
 #include <string.h>
 #include <psp2/kernel/clib.h>
 #include <psp2/kernel/threadmgr.h>
+#include <stdatomic.h>
 
 #include "utils/utils.h"
 #include "utils/logger.h"
@@ -258,6 +259,14 @@ pthread_t *pthread_self_soloader() {
     return &s_pthreadSelfRet;
 }
 
+int pthread_once_soloader(volatile int *once_control, void (*init_routine)(void)) {
+    if (!once_control || !init_routine)
+        return -1;
+    if (__sync_lock_test_and_set(once_control, 1) == 0)
+        (*init_routine)();
+    return 0;
+}
+
 #ifndef MAX_TASK_COMM_LEN
 #define MAX_TASK_COMM_LEN 16
 #endif
@@ -287,7 +296,7 @@ int sem_getvalue_soloader (int * uid, int * sval) {
     SceKernelSemaInfo info;
     info.size = sizeof(SceKernelSemaInfo);
 
-    if (!sceKernelGetSemaInfo(*uid, &info)) return -1;
+    if (sceKernelGetSemaInfo(*uid, &info) < 0) return -1;
     if (!sval) sval = malloc(sizeof(int32_t));
     *sval = info.currentCount;
     return 0;
