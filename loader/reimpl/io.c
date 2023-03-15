@@ -108,11 +108,12 @@ int readdir_r_soloader(DIR *dirp, dirent64_bionic *entry, dirent64_bionic **resu
 
 FILE *fopen_soloader(char *fname, char *mode) {
     char new_path[1024];
-    if (strncmp(fname, "/sdcard", 7) == 0) {
-        snprintf(new_path, sizeof(new_path), "%s%s", DATA_PATH, fname + 7);
-        fname = new_path;
+    if (strncmp(fname, "/sdcard/Android/data", 20) == 0) {
+        snprintf(new_path, sizeof(new_path), "ux0:data/backstab/%s", fname + 20);
+    } else if (strncmp(fname, "/sdcard", 7) == 0) {
+        snprintf(new_path, sizeof(new_path), "ux0:data/backstab/com.gameloft.android.ANMP.GloftSDHM/files/%s", fname + 7);
     } else {
-        snprintf(new_path, sizeof(new_path), "%s", fname);
+        snprintf(new_path, sizeof(new_path), "ux0:data/backstab/com.gameloft.android.ANMP.GloftSDHM/files/%s", fname);
     }
 
     FILE* ret = fopen(new_path, mode);

@@ -1,0 +1,44 @@
+// profile sce_vp_psp2
+
+#define GLITCH_OPENGLES_2
+#define CHEAT_SATURATION
+#define SHADER_ADJUST_SATURATION
+#define SHADER_DESATURATE_AMOUNT 0.150000
+#define SHADER_RED_AMOUNT 0.400000
+#define SHADER_GREEN_AMOUNT 0.100000
+#define SHADER_BLUE_AMOUNT 0.200000
+#define DEFAULT_LOD_BIAS -0.75
+#define LOW_GFX_VERSION
+#define USE_VERTEX_SPECULAR
+
+
+#define USE_FOG
+
+
+uniform float4x4 WorldViewProjection;
+
+
+#ifdef USE_FOG
+uniform float2 FogStartEnd;
+uniform float4 FogColor;
+uniform float InvFogHeight;
+uniform float FogMaxValue;
+
+#endif
+
+void main(
+	float4 Position,
+	float2 TexCoord0,
+	float2 out vCoord0 : TEXCOORD0,
+	float out FogFactor : FOG,
+	float4 out gl_Position : POSITION
+) {
+	gl_Position 		= mul(Position, WorldViewProjection);
+	vCoord0				= TexCoord0;
+
+#ifdef USE_FOG
+	// Fog
+//    FogFactor 			= clamp(1.0 - (abs(Position.z) / InvFogHeight), 0.0, FogColor.a) * FogMaxValue;
+    FogFactor 			= max(0.0, min(1.0 - (abs(Position.z) / InvFogHeight), FogColor.a)) * FogMaxValue;
+#endif
+}

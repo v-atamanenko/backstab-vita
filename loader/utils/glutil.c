@@ -40,33 +40,15 @@ void gl_swap() {
     vglSwapBuffers(GL_FALSE);
 }
 
-void glShaderSourceHook(GLuint shader, GLsizei count, const GLchar **string,
-                        const GLint *_length) {
-    int length;
-
-    if (!string) {
-        log_error("Shader source string is NULL");
-        return;
-    } else if (!*string) {
-        log_error("Shader source *string is NULL");
-        return;
-    }
-
-    // From OGL specs: If length is NULL, each string is assumed to be null terminated.
-    if (!_length) {
-        length = (int)strlen(*string);
-    } else {
-        length = *_length;
-    }
-
-    char* sha_name = get_string_sha1((uint8_t*)*string, length);
+void load_shader(GLuint shader, const char * string, size_t length) {
+    char* sha_name = get_string_sha1((uint8_t*)string, length);
 
     char gxp_path[128];
     snprintf(gxp_path, sizeof(gxp_path), "%s/%s.gxp", GXP_PATH, sha_name);
 
     FILE *file = fopen(gxp_path, "rb");
     if (!file) {
-        logv_error("[%i] Could not find %s", count, gxp_path);
+        logv_error("Could not find %s", gxp_path);
 
         char glsl_path[128];
         snprintf(glsl_path, sizeof(glsl_path), "%s/%s.glsl",
@@ -74,12 +56,18 @@ void glShaderSourceHook(GLuint shader, GLsizei count, const GLchar **string,
 
         file = fopen(glsl_path, "w");
         if (file) {
-            fwrite(*string, 1, length, file);
+            fwrite(string, 1, length, file);
             fclose(file);
         }
 
-        snprintf(gxp_path, sizeof(gxp_path), "%s/%s.gxp",
-                 GXP_PATH, "35F2321364838669AF52201BB354CEA05FCF5B55");
+        if (strstr(string, "gl_FragColor")) {
+            snprintf(gxp_path, sizeof(gxp_path), "%s/%s.gxp",
+                 GXP_PATH, "5A15E3B9880E4A31D85F2A1C61D0D5BEC4E2FE70");
+        } else {
+            snprintf(gxp_path, sizeof(gxp_path), "%s/%s.gxp",
+                 GXP_PATH, "E1CAB39F00F9FDAC9E57B600A3E721A888EFADF6");
+        }
+
         file = fopen(gxp_path, "rb");
     }
 
@@ -101,6 +89,44 @@ void glShaderSourceHook(GLuint shader, GLsizei count, const GLchar **string,
         if(shaderBuf) free(shaderBuf);
     }
     free(sha_name);
+}
+
+void glShaderSourceHook(GLuint shader, GLsizei count, const GLchar **string,
+                        const GLint *_length) {
+    if (!string) {
+        log_error("Shader source string is NULL");
+        return;
+    } else if (!*string) {
+        log_error("Shader source *string is NULL");
+        return;
+    }
+
+    int total_length = 0;
+
+    for (int i = 0; i < count; ++i) {
+        if (!_length) {
+            total_length += strlen(string[i]);
+        } else {
+            total_length += _length[i];
+        }
+    }
+
+    char * str = malloc(total_length+1);
+    int l = 0;
+
+    for (int i = 0; i < count; ++i) {
+        if (!_length) {
+            memcpy(str + l, string[i], strlen(string[i]));
+            l += strlen(string[i]);
+        } else {
+            memcpy(str + l, string[i], _length[i]);
+            l += strlen(string[i]);
+        }
+    }
+    str[total_length+1] = '\0';
+
+    load_shader(shader, str, total_length);
+    free(str);
 }
 
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor) {

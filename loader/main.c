@@ -39,14 +39,25 @@ int main(int argc, char* argv[]) {
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit)() = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit");
     
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch)(void *env, void *obj, int action, int x, int y, int index) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch");
+    int (* JNI_OnLoad)(void *jvm) = (void *)so_symbol(&so_mod, "JNI_OnLoad");
     
     printf("nativeInit %x\n", Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit);
+
+    JNI_OnLoad(&jvm);
+
+    gl_init();
+    
+    dbg;
     Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit(&jni, NULL, 0, SCREEN_W, SCREEN_H, "1.0");
+    dbg;
+
+    Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit();
+
+
     printf("nativeResize\n");
     Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize(&jni, NULL, SCREEN_W, SCREEN_H);
     
     printf("nativeInit2\n");
-    Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit();
 
     int lastX[2] = { -1, -1 };
     int lastY[2] = { -1, -1 };
