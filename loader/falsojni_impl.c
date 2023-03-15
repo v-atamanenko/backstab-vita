@@ -13,6 +13,8 @@
 
 #include "utils/logger.h"
 
+#include "audioPlayer.c"
+
 jfloat GetPhoneCPUFreq(jmethodID id, va_list args) {
     dbg;
     return 0;
@@ -113,7 +115,6 @@ void sendAppToBackground(jmethodID id, va_list args) {
 
 
 NameToMethodID nameToMethodId[] = {
-    
     { 1, "Exit", METHOD_TYPE_VOID }, // ()V
     { 2, "openBrowser", METHOD_TYPE_VOID }, // (Ljava/lang/String;)V
     { 3, "isWifiEnabled", METHOD_TYPE_INT }, // ()I
@@ -135,7 +136,13 @@ NameToMethodID nameToMethodId[] = {
     { 19, "GetOSVersion", METHOD_TYPE_INT }, // ()I
     { 20, "GameTracking", METHOD_TYPE_VOID }, // ()V
     { 21, "sendAppToBackground", METHOD_TYPE_VOID }, // ()V
-
+    { 22, "android/media/AudioTrack/<init>", METHOD_TYPE_OBJECT }, // (IIIIII)V
+    { 23, "getMinBufferSize", METHOD_TYPE_INT }, // (III)I
+    { 24, "play", METHOD_TYPE_VOID }, // ()V
+    { 25, "pause", METHOD_TYPE_VOID }, // ()V
+    { 26, "stop", METHOD_TYPE_VOID }, // ()V
+    { 27, "release", METHOD_TYPE_VOID }, // ()V
+    { 28, "write", METHOD_TYPE_INT } // ([BII)I
 };
 
 MethodsBoolean methodsBoolean[] = {};
@@ -150,7 +157,9 @@ MethodsInt methodsInt[] = {
     { 5, GetPhoneLanguage },
     { 7, getManufacture },
     { 11, GetTextureFormat },
-    { 19, GetOSVersion }
+    { 19, GetOSVersion },
+    { 23, audioTrack_getMinBufferSize },
+    { 28, audioTrack_write }
 };
 MethodsLong methodsLong[] = {
     { 10, GetCurrentTime }
@@ -159,7 +168,8 @@ MethodsObject methodsObject[] = {
     { 13, GetPhoneManufacturer },
     { 14, GetPhoneModel },
     { 15, GetPhoneCPUName },
-    { 17, GetPhoneGPUName }
+    { 17, GetPhoneGPUName },
+    { 22, audioTrack_init }
 };
 MethodsShort methodsShort[] = {};
 MethodsVoid methodsVoid[] = {
@@ -173,7 +183,11 @@ MethodsVoid methodsVoid[] = {
     { 20, GameTracking },
     { 18, GC },
     { 12, PrintDebug },
-    { 21, sendAppToBackground }
+    { 21, sendAppToBackground },
+    { 24, audioTrack_play },
+    { 25, audioTrack_pause },
+    { 26, audioTrack_stop },
+    { 27, audioTrack_release },
 };
 
 NameToFieldID nameToFieldId[] = {};
