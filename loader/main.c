@@ -20,7 +20,7 @@
 #include <FalsoJNI/FalsoJNI.h>
 #include <so_util/so_util.h>
 
-int _newlib_heap_size_user = 220 * 1024 * 1024;
+int _newlib_heap_size_user = 240 * 1024 * 1024;
 
 so_module so_mod;
 
@@ -29,11 +29,13 @@ so_module so_mod;
 
 #include <psp2/touch.h> 
 
+unsigned int sceUserMainThreadStackSize = 4 * 1024 * 1024;
+
 int main(int argc, char* argv[]) {
     soloader_init_all();
 
     int (* JNI_OnLoad)(void *jvm) = (void *)so_symbol(&so_mod, "JNI_OnLoad");
-    
+
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize)(void *env, void *obj, int width, int height) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize");
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit)(void *env, void *obj, int manufacturer, int width, int height, char *version) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit");
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender)() = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender");

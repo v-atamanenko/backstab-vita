@@ -116,7 +116,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
                       SceVshBridge_stub
                       )
 
-vita_create_self(eboot.bin ${CMAKE_PROJECT_NAME} UNSAFE)
+vita_create_self(eboot.bin ${CMAKE_PROJECT_NAME} UNSAFE NOASLR)
 vita_create_vpk(${VITA_VPKNAME}.vpk ${VITA_TITLEID} eboot.bin
                 VERSION ${VITA_VERSION}
                 NAME ${VITA_APP_NAME}
