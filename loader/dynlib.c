@@ -44,6 +44,9 @@
 #include <wctype.h>
 #include "reimpl/pthr.h"
 
+#if 0
+int gethostname(char *name, size_t len) { return 0; }
+#endif
 int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
 extern void *__aeabi_atexit;
@@ -147,6 +150,10 @@ GLint glGetUniformLocation_hook(GLuint program, const GLchar *name) {
 
 void glGetActiveUniform_hook(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name) {
 	glGetActiveUniform(program, index, bufSize, length, size, type, name);
+	if (!strcmp(name, "BoneMatrices")) {
+		*type = GL_FLOAT_MAT4;
+		*size = 48;
+	}
 	if (!strcmp(name, "_texture")) {
 		strcpy(name, "texture");
 		if (length)
