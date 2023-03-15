@@ -18,7 +18,7 @@
 
 #include "dynlib.h"
 
-#include <OpenSLES.h>
+#include <SLES/OpenSLES.h>
 #include <math.h>
 #include <psp2/kernel/clib.h>
 #include <psp2/kernel/processmgr.h>
@@ -42,6 +42,8 @@
 #include <wchar.h>
 #include <wctype.h>
 #include "reimpl/pthr.h"
+
+int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
 extern void *__aeabi_atexit;
 extern void *__cxa_pure_virtual;
@@ -134,6 +136,21 @@ int __errno_fake() {
 int glBlendColor_fake() {
     sceClibPrintf("glBlendColor_fake FAKE CALLED\n");
     return 0;
+}
+
+GLint glGetUniformLocation_hook(GLuint program, const GLchar *name) {
+	if (!strcmp(name, "texture"))
+		return glGetUniformLocation(program, "_texture");
+	return glGetUniformLocation(program, name);
+}
+
+void glGetActiveUniform_hook(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint *size, GLenum *type, GLchar *name) {
+	glGetActiveUniform(program, index, bufSize, length, size, type, name);
+	if (!strcmp(name, "_texture")) {
+		strcpy(name, "texture");
+		if (length)
+			*length = *length - 1;
+	}
 }
 
 so_default_dynlib default_dynlib[] = {
@@ -305,7 +322,7 @@ so_default_dynlib default_dynlib[] = {
         { "glGenRenderbuffers", (uintptr_t)&glGenRenderbuffers},
         { "glGenTextures", (uintptr_t)&glGenTextures },
         { "glGetActiveAttrib", (uintptr_t)&glGetActiveAttrib},
-        { "glGetActiveUniform", (uintptr_t)&glGetActiveUniform},
+        { "glGetActiveUniform", (uintptr_t)&glGetActiveUniform_hook},
         { "glGetAttribLocation", (uintptr_t)&glGetAttribLocation },
         { "glGetBooleanv", (uintptr_t)&glGetBooleanv },
         { "glGetError", (uintptr_t)&glGetError },
@@ -318,7 +335,7 @@ so_default_dynlib default_dynlib[] = {
         { "glGetShaderiv", (uintptr_t)&glGetShaderiv},
         { "glGetString", (uintptr_t)&glGetString },
         { "glGetTexEnviv", (uintptr_t)&glGetTexEnviv },
-        { "glGetUniformLocation", (uintptr_t)&glGetUniformLocation },
+        { "glGetUniformLocation", (uintptr_t)&glGetUniformLocation_hook },
         { "glHint", (uintptr_t)&glHint },
         { "glIsEnabled", (uintptr_t)&glIsEnabled },
         { "glLightf", (uintptr_t)&ret0 },
