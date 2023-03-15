@@ -120,10 +120,10 @@ void glShaderSourceHook(GLuint shader, GLsizei count, const GLchar **string,
             l += strlen(string[i]);
         } else {
             memcpy(str + l, string[i], _length[i]);
-            l += strlen(string[i]);
+            l += _length[i];
         }
     }
-    str[total_length+1] = '\0';
+    str[total_length] = '\0';
 
     load_shader(shader, str, total_length);
     free(str);
