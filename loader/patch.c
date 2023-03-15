@@ -19,15 +19,6 @@
 
 extern so_module so_mod;
 
-int S_SetScreenSize() {
-    sceClibPrintf("called S_SetScreenSize\n");
-}
-
-int _ZN6glitch16CAndroidOSDevice12createKeyMapEv() {
-    sceClibPrintf("called _ZN6glitch16CAndroidOSDevice12createKeyMapEv\n");
-    return 0;
-}
-
 static char buffer_log[2048];
 static char buffer_log_2[2048];
 
@@ -52,11 +43,12 @@ int ** lockPointer3;
 int ** lockPointer4;
 
 void so_patch(void) {
-        hook_addr((uintptr_t)so_symbol(&so_mod, "_ZN6glitch2os7Printer5printEPKcz"), (uintptr_t)&osPrinterPrint);
-        hook_addr((uintptr_t)so_symbol(&so_mod, "_ZN6glitch2os7Printer3logEPKcNS_10ELOG_LEVELE"), (uintptr_t)&osPrinterLog);
-        hook_addr((uintptr_t)so_symbol(&so_mod, "S_SetScreenSize"), (uintptr_t)&S_SetScreenSize);
-        hook_addr((uintptr_t)so_symbol(&so_mod, "_ZN6glitch16CAndroidOSDevice12createKeyMapEv"), (uintptr_t)&_ZN6glitch16CAndroidOSDevice12createKeyMapEv);
-
+    // Internal logging funcs
+    hook_addr((uintptr_t)so_symbol(&so_mod, "_ZN6glitch2os7Printer5printEPKcz"), (uintptr_t)&osPrinterPrint);
+    hook_addr((uintptr_t)so_symbol(&so_mod, "_ZN6glitch2os7Printer3logEPKcNS_10ELOG_LEVELE"), (uintptr_t)&osPrinterLog);
+    
+    // Bypass DRM
+    {
         lockPointer1 = (uintptr_t)so_symbol(&so_mod, "lockPointer1");
         lockPointer2 = (uintptr_t)so_symbol(&so_mod, "lockPointer2");
         lockPointer3 = (uintptr_t)so_symbol(&so_mod, "lockPointer3");
@@ -73,6 +65,5 @@ void so_patch(void) {
 
         *lockPointer4 = malloc(4);
         **lockPointer4 = 1;
-
-
+    }
 }

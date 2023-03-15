@@ -32,6 +32,8 @@ so_module so_mod;
 int main(int argc, char* argv[]) {
     soloader_init_all();
 
+    int (* JNI_OnLoad)(void *jvm) = (void *)so_symbol(&so_mod, "JNI_OnLoad");
+    
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize)(void *env, void *obj, int width, int height) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize");
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit)(void *env, void *obj, int manufacturer, int width, int height, char *version) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit");
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender)() = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender");
@@ -39,25 +41,16 @@ int main(int argc, char* argv[]) {
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit)() = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit");
     
     int (* Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch)(void *env, void *obj, int action, int x, int y, int index) = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch");
-    int (* JNI_OnLoad)(void *jvm) = (void *)so_symbol(&so_mod, "JNI_OnLoad");
     
-    printf("nativeInit %x\n", Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit);
-
     JNI_OnLoad(&jvm);
 
     gl_init();
     
-    dbg;
     Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit(&jni, NULL, 0, SCREEN_W, SCREEN_H, "1.0");
-    dbg;
 
     Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit();
 
-
-    printf("nativeResize\n");
     Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize(&jni, NULL, SCREEN_W, SCREEN_H);
-    
-    printf("nativeInit2\n");
 
     int lastX[2] = { -1, -1 };
     int lastY[2] = { -1, -1 };
@@ -85,7 +78,6 @@ int main(int argc, char* argv[]) {
             }
         }
     
-        printf("nativeRender\n");
         Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender();
         vglSwapBuffers(0);
     }
