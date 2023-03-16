@@ -17,7 +17,7 @@ jobject audioTrack_init(jmethodID id, va_list args) {
               "channelConfig: %i, audioFormat: %i, bufferSizeInBytes: %i, "
               "mode: %i)", streamType, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes, mode);
 
-    return NULL; // ret is unused
+    return 0xfeed; // anything non-null works
 }
 
 
