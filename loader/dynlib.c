@@ -124,7 +124,7 @@ void glDrawArraysHook(GLenum mode, GLint first, GLsizei count) {
 }
 
 int pthread_cond_timedwait_relative_np_soloader() {
-    sceClibPrintf("CALLED pthread_cond_timedwait_relative_np_soloader !!!!\n");
+    log_error("Called pthread_cond_timedwait_relative_np_soloader !!!");
     return 0;
 }
 
@@ -134,12 +134,8 @@ int uname_fake(void *buf) {
 }
 
 int __errno_fake() {
-    sceClibPrintf("ERRNO FAKE CALLED\n");
+    log_error("Called __errno_fake !!!");
     return __errno();
-}
-int glBlendColor_fake() {
-    sceClibPrintf("glBlendColor_fake FAKE CALLED\n");
-    return 0;
 }
 
 GLint glGetUniformLocation_hook(GLuint program, const GLchar *name) {
@@ -276,7 +272,7 @@ so_default_dynlib default_dynlib[] = {
         { "glBindFramebuffer", (uintptr_t)&glBindFramebuffer},
         { "glBindRenderbuffer", (uintptr_t)&glBindRenderbuffer },
         { "glBindTexture", (uintptr_t)&glBindTexture },
-        { "glBlendColor", (uintptr_t)&glBlendColor_fake },
+        { "glBlendColor", (uintptr_t)&ret0 },
         { "glBlendEquation", (uintptr_t)&glBlendEquation },
         { "glBlendFunc", (uintptr_t)&glBlendFunc },
         { "glBufferData", (uintptr_t)&glBufferData },

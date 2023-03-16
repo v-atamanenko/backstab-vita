@@ -10,107 +10,121 @@
  */
 
 #include <FalsoJNI/FalsoJNI_Impl.h>
+#include <psp2/apputil.h>
+#include <psp2/system_param.h>
+#include <stdlib.h>
 
+#include "utils/utils.h"
 #include "utils/logger.h"
 
 #include "audioPlayer.c"
 
 jfloat GetPhoneCPUFreq(jmethodID id, va_list args) {
-    dbg;
-    return 0;
+    return 444;
 }
 
 jint getManufacture(jmethodID id, va_list args) {
-    dbg;
-    return 0;
+    // 10 for sony ericsson
+    return 10;
 }
 
 jint GetOSVersion(jmethodID id, va_list args) {
-    dbg;
-    return 0;
+    return 10; // GINGERBREAD_MR1 / Android 2.3.3
 }
 
 jint GetPhoneLanguage(jmethodID id, va_list args) {
-    dbg;
-    return 0;
+    int lang = -1;
+    sceAppUtilSystemParamGetInt(SCE_SYSTEM_PARAM_ID_LANG, &lang);
+    switch (lang) {
+        case SCE_SYSTEM_PARAM_LANG_ITALIAN:
+            return 4;
+        case SCE_SYSTEM_PARAM_LANG_GERMAN:
+            return 2;
+        case SCE_SYSTEM_PARAM_LANG_KOREAN:
+            return 7;
+        case SCE_SYSTEM_PARAM_LANG_JAPANESE:
+            return 6;
+        case SCE_SYSTEM_PARAM_LANG_PORTUGUESE_PT:
+        case SCE_SYSTEM_PARAM_LANG_PORTUGUESE_BR:
+            return 5;
+        case SCE_SYSTEM_PARAM_LANG_SPANISH:
+            return 3;
+        case SCE_SYSTEM_PARAM_LANG_FRENCH:
+            return 1;
+        // TODO: There probably is a code for Chinese as well?
+        default:
+            return 0;
+    }
 }
 
 jint GetTextureFormat(jmethodID id, va_list args) {
-    dbg;
-    return 0;
+    return 1;
 }
 
 jint isWifiEnabled(jmethodID id, va_list args) {
-    dbg;
     return 0;
 }
 
 jlong GetCurrentTime(jmethodID id, va_list args) {
-    dbg;
-    return 0;
+    return (int64_t) current_timestamp_ms();
 }
 
-
 jobject GetPhoneCPUName(jmethodID id, va_list args) {
-    dbg;
-    return "nothing";
+    return "ARMv7 Processor rev 10 (v7l)";
 }
 
 jobject GetPhoneGPUName(jmethodID id, va_list args) {
-    dbg;
-    return "nothing";
+    return "Sony SGX543 MP4+";
 }
 
 jobject GetPhoneManufacturer(jmethodID id, va_list args) {
-    dbg;
-    return "nothing";
+    return "Sony Ericsson";
 }
 
 jobject GetPhoneModel(jmethodID id, va_list args) {
-    dbg;
-    return "nothing";
+    return "R800";
 }
 
-
 void Exit(jmethodID id, va_list args) {
-    dbg;
+    log_error("Exit() requested via JNI.");
+    exit(0);
 }
 
 void GameTracking(jmethodID id, va_list args) {
-    dbg;
+    // ...
 }
 
 void GC(jmethodID id, va_list args) {
-    dbg;
+    // ...
 }
 
 void launchGLLive(jmethodID id, va_list args) {
-    dbg;
+    // ...
 }
 
 void launchIGP(jmethodID id, va_list args) {
-    dbg;
+    // ...
 }
 
 void notifyTrophy(jmethodID id, va_list args) {
-    dbg;
+    // TODO: This may be needed
 }
 
 void openBrowser(jmethodID id, va_list args) {
-    dbg;
+    // ...
 }
 
 void Pause(jmethodID id, va_list args) {
-    dbg;
+    // ...
 }
 
 void PrintDebug(jmethodID id, va_list args) {
     const char * str = va_arg(args, char*);
-    logv_info("%s", str);
+    logv_info("[PrintDebug] %s", str);
 }
 
 void sendAppToBackground(jmethodID id, va_list args) {
-    dbg;
+    // ...
 }
 
 
