@@ -16,7 +16,7 @@ jobject audioTrack_init(jmethodID id, va_list args) {
               "channelConfig: %i, audioFormat: %i, bufferSizeInBytes: %i, "
               "mode: %i)", streamType, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes, mode);
 	
-	if (audio_port == -1) {
+    if (audio_port == -1) {
         audio_port = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_BGM, bufferSizeInBytes / 4, sampleRateInHz, SCE_AUDIO_OUT_MODE_STEREO);
     }
 	
@@ -78,7 +78,7 @@ jint audioTrack_write(jmethodID id, va_list args) {
     }
 
     uint8_t *audioData = jda->array; // Now this array we can work with
-	sceAudioOutOutput(audio_port, audioData);
+    sceAudioOutOutput(audio_port, audioData);
 	
     return 0;
 }
