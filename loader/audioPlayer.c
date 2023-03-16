@@ -1,8 +1,7 @@
-
-
 // This file reimplements Android/media/AudioTrack class.
 // Reference: https://developer.android.com/reference/android/media/AudioTrack
-
+#include <vitasdk.h>
+int audio_port = -1;
 
 // https://developer.android.com/reference/android/media/AudioTrack#AudioTrack(int,%20int,%20int,%20int,%20int,%20int)
 jobject audioTrack_init(jmethodID id, va_list args) {
@@ -16,7 +15,11 @@ jobject audioTrack_init(jmethodID id, va_list args) {
     logv_info("audioTrack_init(streamType: %i, sampleRateInHz: %i, "
               "channelConfig: %i, audioFormat: %i, bufferSizeInBytes: %i, "
               "mode: %i)", streamType, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes, mode);
-
+	
+    if (audio_port == -1) {
+        audio_port = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_BGM, bufferSizeInBytes / 4, sampleRateInHz, SCE_AUDIO_OUT_MODE_STEREO);
+    }
+	
     return 0xfeed; // anything non-null works
 }
 
@@ -30,7 +33,7 @@ jint audioTrack_getMinBufferSize(jmethodID id, va_list args) {
     logv_info("audioTrack_getMinBufferSize(sampleRateInHz: %i, channelConfig: %i, "
               "audioFormat: %i", sampleRateInHz, channelConfig, audioFormat);
 
-    return 256; // stub value, no thought behind it
+    return 1024; // stub value, no thought behind it
 }
 
 
@@ -61,7 +64,6 @@ void audioTrack_release(jmethodID id, va_list args) {
     log_info("audioTrack_release()");
 }
 
-
 // https://developer.android.com/reference/android/media/AudioTrack#write(byte[],%20int,%20int)
 jint audioTrack_write(jmethodID id, va_list args) {
     jbyteArray _audioData = va_arg(args, jbyteArray);
@@ -75,9 +77,8 @@ jint audioTrack_write(jmethodID id, va_list args) {
         return 0;
     }
 
-    uint8_t * audioData = jda->array; // Now this array we can work with
-
-    // Do something
-
+    uint8_t *audioData = jda->array; // Now this array we can work with
+    sceAudioOutOutput(audio_port, audioData);
+	
     return 0;
 }
