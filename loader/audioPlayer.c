@@ -33,7 +33,7 @@ jint audioTrack_getMinBufferSize(jmethodID id, va_list args) {
     logv_info("audioTrack_getMinBufferSize(sampleRateInHz: %i, channelConfig: %i, "
               "audioFormat: %i", sampleRateInHz, channelConfig, audioFormat);
 
-    return 1024; // stub value, no thought behind it
+    return 4096;
 }
 
 

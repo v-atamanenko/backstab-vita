@@ -21,6 +21,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <psp2/kernel/sysmem.h>
+#include <psp2/io/stat.h>
 
 #define GLSL_PATH DATA_PATH
 #define GXP_PATH "app0:shaders"
@@ -40,53 +41,35 @@ void gl_swap() {
     vglSwapBuffers(GL_FALSE);
 }
 
+GLboolean skip_next_compile = GL_FALSE;
+char next_shader_fname[128];
+
 void load_shader(GLuint shader, const char * string, size_t length) {
     char* sha_name = get_string_sha1((uint8_t*)string, length);
 
     char gxp_path[128];
-    snprintf(gxp_path, sizeof(gxp_path), "%s/%s.gxp", GXP_PATH, sha_name);
+    snprintf(gxp_path, sizeof(gxp_path), DATA_PATH"gxp/%c%c/%s.gxp", sha_name[0], sha_name[1], sha_name);
+
 
     FILE *file = fopen(gxp_path, "rb");
     if (!file) {
-        logv_error("Could not find %s", gxp_path);
-
-        char glsl_path[128];
-        snprintf(glsl_path, sizeof(glsl_path), "%s/%s.glsl",
-                 GLSL_PATH, sha_name);
-
-        file = fopen(glsl_path, "w");
-        if (file) {
-            fwrite(string, 1, length, file);
-            fclose(file);
-        }
-
-        if (strstr(string, "gl_FragColor")) {
-            snprintf(gxp_path, sizeof(gxp_path), "%s/%s.gxp",
-                 GXP_PATH, "5A15E3B9880E4A31D85F2A1C61D0D5BEC4E2FE70");
-        } else {
-            snprintf(gxp_path, sizeof(gxp_path), "%s/%s.gxp",
-                 GXP_PATH, "E1CAB39F00F9FDAC9E57B600A3E721A888EFADF6");
-        }
-
-        file = fopen(gxp_path, "rb");
-    }
-
-    if (file) {
-        logv_info("glShaderSourceHook: loading shader %s", gxp_path);
-        size_t shaderSize;
-        void *shaderBuf;
-
+        mkpath(gxp_path, 0777);
+        glShaderSource(shader, 1, &string, &length);
+        snprintf(next_shader_fname, sizeof(next_shader_fname), DATA_PATH"gxp/%c%c/%s.gxp", sha_name[0], sha_name[1], sha_name);
+    } else {
         fseek(file, 0, SEEK_END);
-        shaderSize = ftell(file);
+        uint32_t size = ftell(file);
         fseek(file, 0, SEEK_SET);
 
-        shaderBuf = malloc(shaderSize);
-        fread(shaderBuf, 1, shaderSize, file);
+        char * shaderBuf = malloc(size + 1);
+        fread(shaderBuf, 1, size, file);
+        shaderBuf[size] = 0;
         fclose(file);
 
-        glShaderBinary(1, &shader, 0, shaderBuf, (int32_t)shaderSize);
+        glShaderBinary(1, &shader, 0, shaderBuf, (int32_t)size);
 
         if(shaderBuf) free(shaderBuf);
+        skip_next_compile = GL_TRUE;
     }
     free(sha_name);
 }
@@ -127,6 +110,20 @@ void glShaderSourceHook(GLuint shader, GLsizei count, const GLchar **string,
 
     load_shader(shader, str, total_length);
     free(str);
+}
+
+void glCompileShaderHook(GLuint shader) {
+    if (!skip_next_compile) {
+        glCompileShader(shader);
+        void *bin = vglMalloc(32 * 1024);
+        GLsizei len;
+        vglGetShaderBinary(shader, 32 * 1024, &len, bin);
+        FILE *file = fopen(next_shader_fname, "wb");
+        fwrite(bin, 1, len, file);
+        fclose(file);
+        vglFree(bin);
+    }
+    skip_next_compile = GL_FALSE;
 }
 
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor) {

@@ -23,6 +23,8 @@ void gl_swap();
 void glShaderSourceHook(GLuint shader, GLsizei count,
                         const GLchar **string, const GLint *_length);
 
+void glCompileShaderHook(GLuint shader);
+
 EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor);
 
 EGLBoolean eglGetConfigAttrib(EGLDisplay display,
