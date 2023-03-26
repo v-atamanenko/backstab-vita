@@ -34,6 +34,41 @@ void gl_preload() {
 }
 
 void gl_init() {
+    vglAddSemanticBinding("FogFactor", 0, VGL_TYPE_FOG);
+    vglAddSemanticBinding("fogFactor", 0, VGL_TYPE_FOG);
+
+    vglAddSemanticBinding("vCoord0_1", 8, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("vCoord0_2", 9, VGL_TYPE_TEXCOORD);
+
+    vglAddSemanticBinding("vCoord0", 0, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("vTexCoord0", 0, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("vCoord1", 1, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("vTexCoord1", 1, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("vTexCoord2", 2, VGL_TYPE_TEXCOORD);
+
+    vglAddSemanticBinding("vColor", 0, VGL_TYPE_COLOR);
+    vglAddSemanticBinding("vColor0", 0, VGL_TYPE_COLOR);
+    vglAddSemanticBinding("vLightColor", 2, VGL_TYPE_TEXCOORD);
+
+    vglAddSemanticBinding("VarUVBase", 0, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("VarEyeVec", 1, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("LightVal1", 2, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("LightVal2", 3, VGL_TYPE_TEXCOORD);
+    
+    vglAddSemanticBinding("VarLightVec", 4, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("Exponent", 5, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("SpecularAmbientColor", 6, VGL_TYPE_TEXCOORD);
+    
+    vglAddSemanticBinding("VarUVLightmap", 2, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("VarHalfVec", 3, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("VarFogFactor", 0, VGL_TYPE_FOG);
+    vglAddSemanticBinding("VarOutlineFactor", 7, VGL_TYPE_TEXCOORD);
+    
+
+    vglAddSemanticBinding("VarLight0Vec", 4, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("VarLight1Vec", 5, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("VarColor", 0, VGL_TYPE_COLOR);
+
     vglInitExtended(0, 960, 544, 6 * 1024 * 1024, SCE_GXM_MULTISAMPLE_4X);
 }
 
@@ -49,7 +84,6 @@ void load_shader(GLuint shader, const char * string, size_t length) {
 
     char gxp_path[128];
     snprintf(gxp_path, sizeof(gxp_path), DATA_PATH"gxp/%c%c/%s.gxp", sha_name[0], sha_name[1], sha_name);
-
 
     FILE *file = fopen(gxp_path, "rb");
     if (!file) {
