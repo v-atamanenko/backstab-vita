@@ -95,8 +95,16 @@ bool FancyButton(const char* label, const ImVec2& pos, const ImVec2& size, ImU32
 
 #include "imgui_internal.h"
 
+ImFont* FontSm;
+ImFont* FontMd;
+ImFont* FontLg;
+
 namespace ImGui {
     bool SelectableCentered(const char* label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size_arg);
+
+    void StyledLabel(const char * label);
+
+    void StyledSliderFloat(const char * l, float * val, float min, float max, ImU32 foreground, ImU32 background);
 }
 
 bool ImGui::SelectableCentered(const char* label, bool selected, ImGuiSelectableFlags flags, const ImVec2& size_arg)
@@ -193,6 +201,26 @@ bool ImGui::SelectableCentered(const char* label, bool selected, ImGuiSelectable
     return pressed;
 }
 
+void ImGui::StyledLabel(const char * label) {
+    ImGui::PushFont(FontLg);
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(203, 149, 93, 255));
+    ImGui::Text(label);
+    ImGui::PopStyleColor();
+    ImGui::PopFont();
+}
+
+void ImGui::StyledSliderFloat(const char * l, float * val, float min, float max, ImU32 foreground, ImU32 background) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 3.f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, background);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, background);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, background);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, foreground);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, foreground);
+    ImGui::SliderFloat(l, val, min, max, "%.2f");
+    ImGui::PopStyleColor(5);
+    ImGui::PopStyleVar();
+}
+
 int main(int argc, char *argv[]) {
     settings_reset();
     settings_load();
@@ -212,9 +240,7 @@ int main(int argc, char *argv[]) {
 
     ImGui::GetIO().MouseDrawCursor = false;
 
-    ImFont* FontSm;
-    ImFont* FontMd;
-    ImFont* FontLg;
+
 
 
     ImGuiIO& io = ImGui::GetIO();
@@ -231,6 +257,7 @@ int main(int argc, char *argv[]) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0,0});
 
+
         ImGui::Begin("##main", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         ImDrawList* idl = ImGui::GetWindowDrawList();
@@ -243,23 +270,19 @@ int main(int argc, char *argv[]) {
 
         {
             ImGui::PushItemWidth(184);
-    
-            ImGui::PushFont(FontLg);
+
             ImGui::SetCursorPos({73, 99});
-            ImGui::Text("Left Stick Deadzone");
-            ImGui::PopFont();
+            ImGui::StyledLabel("Left Stick Deadzone");
     
             ImGui::SetCursorPos({73, 123});
-            ImGui::SliderFloat("##leftStickDeadZone", &setting_leftStickDeadZone, 0.01f, 0.5f, "%.2f");
+            ImGui::StyledSliderFloat("##leftStickDeadZone", &setting_leftStickDeadZone, 0.01f, 0.5f, IM_COL32(206, 140, 71, 255), IM_COL32(77, 70, 61, 255));
             SetDescription(OPT_DEADZONE_L);
     
-            ImGui::PushFont(FontLg);
             ImGui::SetCursorPos({274, 99});
-            ImGui::Text("Right Stick Deadzone");
-            ImGui::PopFont();
-    
+            ImGui::StyledLabel("Right Stick Deadzone");
+
             ImGui::SetCursorPos({274, 123});
-            ImGui::SliderFloat("##rightStickDeadZone", &setting_rightStickDeadZone, 0.01f, 0.5f, "%.2f");
+            ImGui::StyledSliderFloat("##rightStickDeadZone", &setting_rightStickDeadZone, 0.01f, 0.5f, IM_COL32(206, 140, 71, 255), IM_COL32(77, 70, 61, 255));
             SetDescription(OPT_DEADZONE_R);
     
             ImGui::PopItemWidth();
@@ -268,19 +291,17 @@ int main(int argc, char *argv[]) {
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, {0,0});
 
         // base color
-        ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(9, 76, 126, 255));
+        ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, IM_COL32(77, 70, 61, 255));
 
         // elements color
-        ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(0, 146, 255, 255));
+        ImGui::PushStyleColor(ImGuiCol_Header, IM_COL32(206, 140, 71, 255));
 
         // hovered elements color
-        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, IM_COL32(0, 146, 255, 255));
+        ImGui::PushStyleColor(ImGuiCol_HeaderHovered, IM_COL32(206, 140, 71, 255));
 
         {
-            ImGui::PushFont(FontLg);
             ImGui::SetCursorPos({73, 160});
-            ImGui::Text("FPS Lock");
-            ImGui::PopFont();
+            ImGui::StyledLabel("FPS Lock");
 
             ImGui::SetCursorPos({73, 182});
             if (ImGui::SelectableCentered("No Lock", setting_fpsLock == 0, 0, {120,20}))
@@ -305,10 +326,8 @@ int main(int argc, char *argv[]) {
 
 
         {
-            ImGui::PushFont(FontLg);
             ImGui::SetCursorPos({73, 220});
-            ImGui::Text("GFX Detail");
-            ImGui::PopFont();
+            ImGui::StyledLabel("GFX Detail");
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, {3,10});
             ImGui::SetCursorPos({73, 243});
@@ -324,10 +343,8 @@ int main(int argc, char *argv[]) {
         }
 
         {
-            ImGui::PushFont(FontLg);
             ImGui::SetCursorPos({245, 220});
-            ImGui::Text("Geometry Detail");
-            ImGui::PopFont();
+            ImGui::StyledLabel("Geometry Detail");
 
             ImGui::SetCursorPos({246, 243});
             if (ImGui::SelectableCentered("Low##geom", setting_geometryDetail == 0, 0, {60,20}))
@@ -346,10 +363,8 @@ int main(int argc, char *argv[]) {
         }
 
         {
-            ImGui::PushFont(FontLg);
             ImGui::SetCursorPos({73, 281});
-            ImGui::Text("MIP Maps");
-            ImGui::PopFont();
+            ImGui::StyledLabel("MIP Maps");
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, {3,10});
             ImGui::SetCursorPos({73, 305});
@@ -367,13 +382,11 @@ int main(int argc, char *argv[]) {
         {
             ImGui::PushItemWidth(212);
 
-            ImGui::PushFont(FontLg);
             ImGui::SetCursorPos({246, 281});
-            ImGui::Text("View Distance");
-            ImGui::PopFont();
+            ImGui::StyledLabel("View Distance");
 
             ImGui::SetCursorPos({246, 305});
-            ImGui::SliderFloat("##viewDistance", &setting_viewDistance, 0.4f, 3.0f, "%.2f");
+            ImGui::StyledSliderFloat("##viewDistance", &setting_viewDistance, 0.4f, 3.0f, IM_COL32(206, 140, 71, 255), IM_COL32(77, 70, 61, 255));
             SetDescription(OPT_VIEWDISTANCE);
 
             ImGui::PopItemWidth();

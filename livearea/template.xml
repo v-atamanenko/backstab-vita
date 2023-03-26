@@ -6,7 +6,7 @@
 	</livearea-background>
 	 
 	<gate>
-		<startup-image>mkktbkkt.png</startup-image>
+		<startup-image>gate.png</startup-image>
 	</gate>
 
 	<frame id="frame3">
