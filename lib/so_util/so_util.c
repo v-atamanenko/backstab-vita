@@ -104,6 +104,11 @@ so_hook hook_addr(uintptr_t addr, uintptr_t dst) {
         return hook_arm(addr, dst);
 }
 
+void so_unhook(so_hook *hook) {
+    kuKernelCpuUnrestrictedMemcpy((void *)hook->addr, hook->orig_instr, sizeof(hook->orig_instr));
+    kuKernelFlushCaches((void *)hook->addr, sizeof(hook->orig_instr));
+}
+
 void so_flush_caches(so_module *mod) {
     kuKernelFlushCaches((void *)mod->text_base, mod->text_size);
 }

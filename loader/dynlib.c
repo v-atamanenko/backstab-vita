@@ -33,6 +33,7 @@
 
 #include "utils/utils.h"
 #include "utils/glutil.h"
+#include "utils/logger.h"
 #include "utils/settings.h"
 #include "reimpl/io.h"
 #include "reimpl/log.h"
@@ -157,7 +158,20 @@ void glGetActiveUniform_hook(GLuint program, GLuint index, GLsizei bufSize, GLsi
 	}
 }
 
+void glTexImage2D_hook(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid *data) {
+    if (level == 0)
+        glTexImage2D(target, level, internalFormat, width, height, border, format, type, data);
+}
+
+void glCompressedTexImage2D_hook(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const void *data) {
+    if (level == 0)
+        glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+}
+
 so_default_dynlib default_dynlib[] = {
+        { "glCompressedTexImage2D", (uintptr_t)&glCompressedTexImage2D },
+        { "glGenerateMipmap", (uintptr_t)&glGenerateMipmap }, // nuke mips
+        { "glTexImage2D", (uintptr_t)&glTexImage2D },
         { "__aeabi_atexit", (uintptr_t)&__aeabi_atexit },
         { "__aeabi_d2f", (uintptr_t)&__aeabi_d2f },
         { "__aeabi_d2iz", (uintptr_t)&__aeabi_d2iz },
@@ -262,7 +276,7 @@ so_default_dynlib default_dynlib[] = {
         { "fwrite", (uintptr_t)&fwrite },
         { "getaddrinfo", (uintptr_t)&getaddrinfo},
         { "getc", (uintptr_t)&getc},
-        { "getenv", (uintptr_t)&getenv_soloader },
+        { "getenv", (uintptr_t)&ret0 },
         { "gethostname", (uintptr_t)&gethostname },
         { "gettimeofday", (uintptr_t)&gettimeofday },
         { "glActiveTexture", (uintptr_t)&glActiveTexture },
@@ -289,7 +303,6 @@ so_default_dynlib default_dynlib[] = {
         { "glColorMask", (uintptr_t)&glColorMask },
         { "glColorPointer", (uintptr_t)&glColorPointer },
         { "glCompileShader", (uintptr_t)&ret0 },
-        { "glCompressedTexImage2D", (uintptr_t)&glCompressedTexImage2D },
         { "glCompressedTexSubImage2D", (uintptr_t)&ret0},
         { "glCopyTexImage2D", (uintptr_t)&ret0 },
         { "glCopyTexSubImage2D", (uintptr_t)&glCopyTexSubImage2D },
@@ -321,7 +334,6 @@ so_default_dynlib default_dynlib[] = {
         { "glFrontFace", (uintptr_t)&glFrontFace },
         { "glFrustumf", (uintptr_t)&glFrustumf },
         { "glGenBuffers", (uintptr_t)&glGenBuffers },
-        { "glGenerateMipmap", (uintptr_t)&glGenerateMipmap },
         { "glGenFramebuffers", (uintptr_t)&glGenFramebuffers},
         { "glGenRenderbuffers", (uintptr_t)&glGenRenderbuffers},
         { "glGenTextures", (uintptr_t)&glGenTextures },
@@ -377,7 +389,6 @@ so_default_dynlib default_dynlib[] = {
         { "glTexEnvf", (uintptr_t)&glTexEnvf },
         { "glTexEnvfv", (uintptr_t)&glTexEnvfv },
         { "glTexEnvi", (uintptr_t)&glTexEnvi },
-        { "glTexImage2D", (uintptr_t)&glTexImage2D },
         { "glTexParameterf", (uintptr_t)&glTexParameterf },
         { "glTexParameteri", (uintptr_t)&glTexParameteri },
         { "glTexParameterx", (uintptr_t)&glTexParameterx },
@@ -541,5 +552,12 @@ void resolve_imports(so_module* mod) {
     __sF_fake[0] = *stdin;
     __sF_fake[1] = *stdout;
     __sF_fake[2] = *stderr;
+
+    if (setting_enableMipMaps == false) {
+        default_dynlib[0].func = (uintptr_t)&glCompressedTexImage2D_hook;
+        default_dynlib[1].func = (uintptr_t)&ret0;
+        default_dynlib[2].func = (uintptr_t)&glTexImage2D_hook;
+    }
+
     so_resolve(mod, default_dynlib, sizeof(default_dynlib), 0);
 }

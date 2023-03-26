@@ -59,6 +59,8 @@ so_hook hook_thumb(uintptr_t addr, uintptr_t dst);
 so_hook hook_arm(uintptr_t addr, uintptr_t dst);
 so_hook hook_addr(uintptr_t addr, uintptr_t dst);
 
+void so_unhook(so_hook * hook);
+
 void so_flush_caches(so_module *mod);
 int so_file_load(so_module *mod, const char *filename, uintptr_t load_addr);
 int so_mem_load(so_module *mod, void * buffer, size_t so_size, uintptr_t load_addr);

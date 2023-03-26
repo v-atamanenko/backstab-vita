@@ -20,10 +20,10 @@ extern "C" {
 extern float setting_leftStickDeadZone;
 extern float setting_rightStickDeadZone;
 extern int setting_fpsLock;
-extern bool setting_physicalControlsEnabled;
-extern bool setting_useHdMod;
-extern bool setting_useRebalanceMod;
-extern bool setting_useRebalanceModOldPrices;
+extern int setting_gfxDetail;
+extern int setting_geometryDetail;
+extern bool setting_enableMipMaps;
+extern float setting_viewDistance;
 
 void settings_load();
 void settings_save();
