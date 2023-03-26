@@ -95,12 +95,20 @@ float lerp(float x1, float y1, float x3, float y3, float x2) {
     return ((x2-x1)*(y3-y1) / (x3-x1)) + y1;
 }
 
-float coord_normalize(float val, float deadzone, float max) {
-    float sign = 1.0f;
-    if (val < 0) sign = -1.0f;
-
-    if (fabsf(val) < deadzone) return 0.f;
-    return lerp(0.f, deadzone * sign, 1.0f*sign, max*sign, val);
+void coord_normalize(float *x, float *y, float deadZone, float maximum) {
+    //radial and scaled deadzone
+    //http://www.third-helix.com/2013/04/12/doing-thumbstick-dead-zones-right.html
+    float analogX = (float) *x;
+    float analogY = (float) *y;
+    float magnitude = sqrt(analogX * analogX + analogY * analogY);
+    if (magnitude >= deadZone) {
+        float scalingFactor = maximum / magnitude * (magnitude - deadZone) / (maximum - deadZone);
+        *x = (analogX * scalingFactor);
+        *y = (analogY * scalingFactor);
+    } else {
+        *x = 0;
+        *y = 0;
+    }
 }
 
 void controls_init() {
@@ -220,10 +228,12 @@ void controls_poll() {
         rDown = 0;
     }
 
-    lx = coord_normalize(((float)pad.lx - 128.0f) / 128.0f, setting_leftStickDeadZone, 0.8f);
-    ly = coord_normalize(((float)pad.ly - 128.0f) / 128.0f, setting_leftStickDeadZone, 0.8f);
-    rx = coord_normalize(((float)pad.rx - 128.0f) / 128.0f, setting_rightStickDeadZone, 0.9f);
-    ry = coord_normalize(((float)pad.ry - 128.0f) / 128.0f, setting_rightStickDeadZone, 0.9f);
+    lx = ((float)pad.lx - 128.0f) / 128.0f;
+    ly = ((float)pad.ly - 128.0f) / 128.0f;
+    rx = ((float)pad.rx - 128.0f) / 256.0f; // We scale it down by 0.5 to reduce sensitivity
+    ry = ((float)pad.ry - 128.0f) / 256.0f; // We scale it down by 0.5 to reduce sensitivity
+    coord_normalize(&lx, &ly, setting_leftStickDeadZone, 0.8f);
+    coord_normalize(&rx, &ry, setting_rightStickDeadZone, 0.9f);
 
     float touchLx_radius = 75;
     float touchLy_radius = 75;
