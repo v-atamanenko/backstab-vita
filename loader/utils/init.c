@@ -66,6 +66,13 @@ void soloader_init_all() {
                     "sure that you have %s file exactly at that path.", SO_PATH);
     }
 
+    if (!file_exists(DATA_PATH"com.gameloft.android.ANMP.GloftSDHM/files/splash_fixed.pvr")) {
+        cp("app0:data/splash_fixed.pvr", DATA_PATH"com.gameloft.android.ANMP.GloftSDHM/files/splash_fixed.pvr");
+        cp("app0:data/loading_menu_fixed.pvr", DATA_PATH"com.gameloft.android.ANMP.GloftSDHM/files/loading_menu_fixed.pvr");
+        cp("app0:data/loading_menu_fixed.bsprite", DATA_PATH"com.gameloft.android.ANMP.GloftSDHM/files/loading_menu_fixed.bsprite");
+        cp("app0:data/control0", DATA_PATH"com.gameloft.android.ANMP.GloftSDHM/files/control0");
+    }
+
     if (so_file_load(&so_mod, SO_PATH, LOAD_ADDRESS) < 0)
         fatal_error("Error: could not load %s.", SO_PATH);
 

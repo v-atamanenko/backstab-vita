@@ -74,4 +74,6 @@ void file_save(const char* path, const uint8_t * buffer, size_t size);
  */
 int mkpath(char* file_path, mode_t mode);
 
+void cp(const char * src, const char * dst);
+
 #endif // SOLOADER_UTILS_H
