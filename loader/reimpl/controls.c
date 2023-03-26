@@ -230,8 +230,8 @@ void controls_poll() {
 
     lx = ((float)pad.lx - 128.0f) / 128.0f;
     ly = ((float)pad.ly - 128.0f) / 128.0f;
-    rx = ((float)pad.rx - 128.0f) / 128.0f;
-    ry = ((float)pad.ry - 128.0f) / 128.0f;
+    rx = ((float)pad.rx - 128.0f) / 256.0f; // We scale it down by 0.5 to reduce sensitivity
+    ry = ((float)pad.ry - 128.0f) / 256.0f; // We scale it down by 0.5 to reduce sensitivity
     coord_normalize(&lx, &ly, setting_leftStickDeadZone, 0.8f);
     coord_normalize(&rx, &ry, setting_rightStickDeadZone, 0.9f);
 
