@@ -309,7 +309,7 @@ int main(int argc, char *argv[]) {
             SetDescription(OPT_FPSLOCK);
 
             ImGui::SetCursorPos({209, 182});
-            if (ImGui::SelectableCentered("40 FPS", setting_fpsLock == 45, 0, {72,20}))
+            if (ImGui::SelectableCentered("40 FPS", setting_fpsLock == 40, 0, {72,20}))
                 setting_fpsLock = 40;
             SetDescription(OPT_FPSLOCK);
 

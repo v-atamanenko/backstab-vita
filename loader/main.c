@@ -14,11 +14,14 @@
 #include "utils/init.h"
 #include "utils/glutil.h"
 #include "reimpl/controls.h"
+#include "utils/settings.h"
 
 #include <psp2/kernel/threadmgr.h>
 
 #include <FalsoJNI/FalsoJNI.h>
 #include <so_util/so_util.h>
+#include <psp2/kernel/processmgr.h>
+#include <sched.h>
 
 int _newlib_heap_size_user = 256 * 1024 * 1024;
 
@@ -38,15 +41,37 @@ int main(int argc, char* argv[]) {
     JNI_OnLoad(&jvm);
 
     gl_init();
-    
+    if (setting_fpsLock > 0 && setting_fpsLock <= 30)
+        eglSwapInterval(0, 2);
+
     Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeInit(&jni, NULL, 0, 960, 544, "1.0");
     Java_com_gameloft_android_ANMP_GloftSDHM_Game_nativeInit();
     Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeResize(&jni, NULL, 960, 544);
 
-    while (1) {
-        controls_poll();
-        Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender();
-        vglSwapBuffers(0);
+    if (setting_fpsLock == 0 || setting_fpsLock == 30) {
+        while (1) {
+            controls_poll();
+            Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender();
+            vglSwapBuffers(0);
+        }
+    }
+
+    if (setting_fpsLock == 25 || setting_fpsLock == 40) {
+        uint32_t last_render_time = sceKernelGetProcessTimeLow();
+        uint32_t delta = (1000000 / (setting_fpsLock+1));
+
+        while (1) {
+            controls_poll();
+            Java_com_gameloft_android_ANMP_GloftSDHM_GameRenderer_nativeRender();
+
+            while (sceKernelGetProcessTimeLow() - last_render_time < delta) {
+                sched_yield();
+            }
+
+            last_render_time = sceKernelGetProcessTimeLow();
+
+            vglSwapBuffers(0);
+        }
     }
 
     sceKernelExitDeleteThread(0);
