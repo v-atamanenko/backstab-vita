@@ -142,8 +142,13 @@ void glShaderSourceHook(GLuint shader, GLsizei count, const GLchar **string,
     }
     str[total_length] = '\0';
 
-    load_shader(shader, str, total_length);
+    char * to_append = "inline float4 glslTexture2D(samplerCUBE x, float3 s) { return texCUBE(x,s); }\n";
+    char * str_final = malloc(total_length + 1 + strlen(to_append));
+    sprintf(str_final, "%s%s", to_append, str);
     free(str);
+
+    load_shader(shader, str_final, total_length + strlen(to_append));
+    free(str_final);
 }
 
 void glCompileShaderHook(GLuint shader) {

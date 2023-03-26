@@ -11,6 +11,7 @@
  */
 
 #include "utils/utils.h"
+#include "logger.h"
 
 #include <psp2/io/stat.h>
 #include <psp2/ctrl.h>
@@ -189,18 +190,19 @@ void file_save(const char* path, const uint8_t * buffer, size_t size) {
 
 void cp(const char * src, const char * dst) {
     if (!file_exists(src)) return;
-    mkpath(dst, 0755);
+
+    char * mkpath_path = strdup(dst);
+    mkpath(mkpath_path, 0755);
+    free(mkpath_path);
 
     FILE *f = fopen(src, "rb");
     if (!f) return;
-
     fseek(f, 0, SEEK_END);
     long size = ftell(f);
     fseek(f, 0, SEEK_SET);
     void *buf = malloc(size);
     fread(buf, 1, size, f);
     fclose(f);
-
     file_save(dst, buf, size);
     free(buf);
 }
