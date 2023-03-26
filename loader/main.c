@@ -24,6 +24,7 @@
 #include <sched.h>
 
 int _newlib_heap_size_user = 256 * 1024 * 1024;
+int sceLibcHeapSize = 4 * 1024 * 1024;
 
 so_module so_mod;
 

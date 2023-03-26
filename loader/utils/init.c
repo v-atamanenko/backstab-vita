@@ -31,6 +31,7 @@
 
 #include <FalsoJNI/FalsoJNI.h>
 #include <so_util/so_util.h>
+#include <fios/fios.h>
 
 // Base address for the Android .so to be loaded at
 #define LOAD_ADDRESS 0x98000000
@@ -55,6 +56,9 @@ void soloader_init_all() {
     scePowerSetBusClockFrequency(222);
     scePowerSetGpuClockFrequency(222);
     scePowerSetGpuXbarClockFrequency(166);
+
+    fios_init();
+    log_info("fios init passed.");
 
     if (!module_loaded("kubridge"))
         fatal_error("Error: kubridge.skprx is not installed.");

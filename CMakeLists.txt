@@ -66,9 +66,13 @@ add_executable(${CMAKE_PROJECT_NAME}
                lib/FalsoJNI/FalsoJNI_ImplBridge.c
                lib/FalsoJNI/FalsoJNI_Logger.c
                lib/sha1/sha1.c
+               lib/fios/fios.c
                lib/so_util/so_util.c
                lib/unzip/unzip.c
                lib/unzip/ioapi.c)
+
+add_subdirectory(lib/libc_bridge)
+add_dependencies(so_loader SceLibcBridge)
 
 target_include_directories(${CMAKE_PROJECT_NAME} SYSTEM
                            PUBLIC ${CMAKE_SOURCE_DIR}/lib
@@ -110,6 +114,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
                       SceDisplay_stub
                       SceKernelDmacMgr_stub
                       SceFios2_stub
+                      ${CMAKE_BINARY_DIR}/lib/libc_bridge/stubs/libSceLibcBridge_stub.a
                       SceCtrl_stub
                       SceGxm_stub
                       ScePower_stub

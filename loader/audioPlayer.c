@@ -67,17 +67,14 @@ void audioTrack_release(jmethodID id, va_list args) {
 // https://developer.android.com/reference/android/media/AudioTrack#write(byte[],%20int,%20int)
 jint audioTrack_write(jmethodID id, va_list args) {
     jbyteArray _audioData = va_arg(args, jbyteArray);
-    int offsetInBytes = va_arg(args, int);
-    int sizeInBytes = va_arg(args, int);
 
-    // Before accessing/changing the array elements, we have to do the following:
     JavaDynArray * jda = jda_find(_audioData);
     if (!jda) {
         log_error("[audioTrack_write] Provided buffer is not a valid JDA.");
         return 0;
     }
 
-    uint8_t *audioData = jda->array; // Now this array we can work with
+    uint8_t *audioData = jda->array;
     sceAudioOutOutput(audio_port, audioData);
 	
     return 0;

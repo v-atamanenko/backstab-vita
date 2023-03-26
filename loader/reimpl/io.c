@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <psp2/kernel/threadmgr.h>
+#include <libc_bridge/libc_bridge.h>
 
 #include "utils/logger.h"
 
@@ -106,18 +107,20 @@ int readdir_r_soloader(DIR *dirp, dirent64_bionic *entry, dirent64_bionic **resu
     return ret;
 }
 
+char fopen_path_real[1024];
+
 FILE *fopen_soloader(char *fname, char *mode) {
-    char new_path[1024];
-    if (strncmp(fname, "/sdcard/Android/data", 20) == 0) {
-        snprintf(new_path, sizeof(new_path), "ux0:data/backstab/%s", fname + 20);
+
+    if (sceClibStrncmp(fname, "/sdcard/Android/data", 20) == 0) {
+        sceClibSnprintf(fopen_path_real, sizeof(fopen_path_real), "ux0:data/backstab/%s", fname + 20);
     } else if (strncmp(fname, "/sdcard", 7) == 0) {
-        snprintf(new_path, sizeof(new_path), "ux0:data/backstab/com.gameloft.android.ANMP.GloftSDHM/files/%s", fname + 7);
+        sceClibSnprintf(fopen_path_real, sizeof(fopen_path_real), "ux0:data/backstab/com.gameloft.android.ANMP.GloftSDHM/files/%s", fname + 7);
     } else {
-        snprintf(new_path, sizeof(new_path), "ux0:data/backstab/com.gameloft.android.ANMP.GloftSDHM/files/%s", fname);
+        sceClibSnprintf(fopen_path_real, sizeof(fopen_path_real), "ux0:data/backstab/com.gameloft.android.ANMP.GloftSDHM/files/%s", fname);
     }
 
-    FILE* ret = fopen(new_path, mode);
-    logv_debug("[io] fopen(%s): 0x%x", new_path, ret);
+    FILE* ret = sceLibcBridge_fopen(fopen_path_real, mode);
+    //logv_debug("[io] fopen(%s): 0x%x", new_path, ret);
     return ret;
 }
 
