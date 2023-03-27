@@ -81,6 +81,7 @@ extern int isOnHorse();
 extern int canCallHorse();
 extern int callHorse();
 extern int canUseVengeance();
+extern void nextGrenade();
 
 extern so_module so_mod;
 
@@ -277,13 +278,21 @@ void controls_poll() {
 
             if (pressed_buttons & mapping_touch[i].sce_button) {
                 if (!(combo1_active && (mapping_touch[i].sce_button == SCE_CTRL_SQUARE || mapping_touch[i].sce_button == SCE_CTRL_R1))) {
-                    nativeOnTouch(&jni, NULL, 1, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
+                    if (isInAimMode() && mapping_touch[i].sce_button == SCE_CTRL_SQUARE) {
+                        nextGrenade();
+                    } else {
+                        nativeOnTouch(&jni, NULL, 1, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
+                    }
                 }
             }
 
             if (released_buttons & mapping_touch[i].sce_button) {
                 if (!(combo1_active && (mapping_touch[i].sce_button == SCE_CTRL_SQUARE || mapping_touch[i].sce_button == SCE_CTRL_R1))) {
-                    nativeOnTouch(&jni, NULL, 0, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
+                    if (isInAimMode() && mapping_touch[i].sce_button == SCE_CTRL_SQUARE) {
+                        // ignore
+                    } else {
+                        nativeOnTouch(&jni, NULL, 0, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
+                    }
                 }
             }
         }

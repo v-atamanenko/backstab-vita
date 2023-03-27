@@ -39,6 +39,7 @@ void gl_init() {
 
     vglAddSemanticBinding("vCoord0_1", 8, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("vCoord0_2", 9, VGL_TYPE_TEXCOORD);
+    vglAddSemanticBinding("vCoord0_3", 7, VGL_TYPE_TEXCOORD);
 
     vglAddSemanticBinding("vCoord0", 0, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("vTexCoord0", 0, VGL_TYPE_TEXCOORD);
@@ -63,8 +64,8 @@ void gl_init() {
     vglAddSemanticBinding("VarUVLightmap", 2, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("VarHalfVec", 3, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("VarFogFactor", 0, VGL_TYPE_FOG);
+
     vglAddSemanticBinding("VarOutlineFactor", 7, VGL_TYPE_TEXCOORD);
-    
 
     vglAddSemanticBinding("VarLight0Vec", 4, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("VarLight1Vec", 5, VGL_TYPE_TEXCOORD);

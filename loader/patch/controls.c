@@ -18,7 +18,19 @@ int (*PlayerComponent_CanCallHorse)(void * this);
 int (*PlayerComponent_CallHorse)(void * this);
 int (*PlayerComponent_CanUseVengeance)(void * this);
 int (*PlayerComponent_CanUseInteractButton)(void * this);
+void (*PlayerComponent_IncrementGrenadeSelection)(void * this, int p);
+void (*PlayerComponent_EnterAimMode)(void * this);
 
+void nextGrenade() {
+    void * lvl = CLevel__GetLevel();
+    if (lvl) {
+        void * pc = CLevel__GetPlayerComponent(lvl);
+        if (pc) {
+            PlayerComponent_IncrementGrenadeSelection(pc, 1);
+            PlayerComponent_EnterAimMode(pc);
+        }
+    }
+}
 
 int isInAimMode() {
     void * lvl = CLevel__GetLevel();
@@ -108,6 +120,8 @@ void patch__controls() {
     PlayerComponent_CallHorse = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent9CallHorseEv");
     PlayerComponent_CanUseVengeance = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent15CanUseVengeanceEv");
     PlayerComponent_CanUseInteractButton = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent20CanUseInteractButtonEv");
+    PlayerComponent_IncrementGrenadeSelection = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent25IncrementGrenadeSelectionEi");
+    PlayerComponent_EnterAimMode = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent12EnterAimModeEv");
 
     CheckInputKey = (uintptr_t)so_symbol(&so_mod, "_Z13CheckInputKeyi17EVENT_ACTION_TYPEii");
     AbsorbKey = (uintptr_t)so_symbol(&so_mod, "_Z9AbsorbKeyi");
