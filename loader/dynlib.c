@@ -248,7 +248,7 @@ so_default_dynlib default_dynlib[] = {
         { "difftime", (uintptr_t)&difftime},
         { "exit", (uintptr_t)&exit },
         { "expf", (uintptr_t)&expf },
-        { "fclose", (uintptr_t)&sceLibcBridge_fclose },
+        { "fclose", (uintptr_t)&fclose_soloader },
         { "fcntl", (uintptr_t)&fcntl_soloader },
         { "ferror", (uintptr_t)&sceLibcBridge_ferror},
         { "fflush", (uintptr_t)&sceLibcBridge_fflush},

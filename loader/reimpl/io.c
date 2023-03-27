@@ -107,9 +107,10 @@ int readdir_r_soloader(DIR *dirp, dirent64_bionic *entry, dirent64_bionic **resu
     return ret;
 }
 
-char fopen_path_real[1024];
+int fopenc = 0;
 
 FILE *fopen_soloader(char *fname, char *mode) {
+    char fopen_path_real[1024];
 
     if (sceClibStrncmp(fname, "/sdcard/Android/data", 20) == 0) {
         sceClibSnprintf(fopen_path_real, sizeof(fopen_path_real), "ux0:data/backstab/%s", fname + 20);
@@ -120,7 +121,8 @@ FILE *fopen_soloader(char *fname, char *mode) {
     }
 
     FILE* ret = sceLibcBridge_fopen(fopen_path_real, mode);
-    //logv_debug("[io] fopen(%s): 0x%x", new_path, ret);
+    if (ret) fopenc++;
+    logv_debug("[io] fopen:%i(%s): 0x%x", fopenc, fopen_path_real, ret);
     return ret;
 }
 
@@ -178,8 +180,9 @@ int close_soloader(int fd) {
 }
 
 int fclose_soloader(FILE * f) {
-    int ret = fclose(f);
-    logv_debug("[io] fclose(0x%x): %i", f, ret);
+    fopenc--;
+    int ret = sceLibcBridge_fclose(f);
+    //logv_debug("[io] fclose(0x%x): %i", f, ret);
     return ret;
 }
 

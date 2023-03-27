@@ -52,17 +52,21 @@ static ButtonToTouchMapping mapping_touch[] = {
         { SCE_CTRL_TRIANGLE,  828, 356 }, // Triangle — Use cannon
         { SCE_CTRL_SQUARE,    865, 445 }, // Square — Sword
         { SCE_CTRL_CROSS,     792, 391 }, // X — Jump
-        { SCE_CTRL_SELECT,    70, 86 },
+        { SCE_CTRL_SELECT,    70,  86  }, // Select — Minimap
+        { SCE_CTRL_CIRCLE,    913, 355 }, // O — Parry / special attack
 
-        /*
-        { SCE_CTRL_UP,        AKEYCODE_DPAD_UP },
-        { SCE_CTRL_DOWN,      AKEYCODE_DPAD_DOWN },
-        { SCE_CTRL_LEFT,      AKEYCODE_DPAD_LEFT },
-        { SCE_CTRL_RIGHT,     AKEYCODE_DPAD_RIGHT },
-
-        { SCE_CTRL_CIRCLE,    AKEYCODE_BACK },
-        { SCE_CTRL_SELECT,    AKEYCODE_BUTTON_SELECT },*/
+        { -1,                 870, 317 }, // R+Square combo
 };
+
+float touchLx_radius = 78;
+float touchLy_radius = 78;
+float touchRx_radius = 42;
+float touchRy_radius = 42;
+
+float touchLx_base = 144;
+float touchLy_base = 414;
+float touchRx_base = 662;
+float touchRy_base = 237;
 
 int (* nativeOnTouch)(void *env, void *obj, int action, int x, int y, int index);
 
@@ -73,6 +77,8 @@ extern void * (*Application__GetInstance)();
 extern int * isPressKey;
 extern int isInAimMode();
 extern int isOnCannon();
+extern int canCallHorse();
+extern int callHorse();
 
 extern so_module so_mod;
 
@@ -144,6 +150,9 @@ void controls_poll() {
         }
     }
 
+    int onCannon = isOnCannon();
+    int canCallRoach = canCallHorse();
+
     SceCtrlData pad;
     sceCtrlPeekBufferPositiveExt2(0, &pad, 1);
 
@@ -193,7 +202,7 @@ void controls_poll() {
         }
 
         // R — Shoot // changes touch location depending on current state
-        if (isOnCannon()) {
+        if (onCannon) {
             mapping_touch[1].x = 806;
             mapping_touch[1].y = 484;
             mapping_touch[2].x = 694; // triangle functions same as L1 here
@@ -205,6 +214,31 @@ void controls_poll() {
             mapping_touch[2].y = 356;
         }
 
+        static int combo1_active = 0;
+        static int r1_pressed = 0;
+        static int square_pressed = 0;
+
+        static int press_count = 0;
+
+        if (pressed_buttons & SCE_CTRL_R1) r1_pressed = 1;
+        if (released_buttons & SCE_CTRL_R1) r1_pressed = 0;
+        if (pressed_buttons & SCE_CTRL_SQUARE) square_pressed = 1;
+        if (released_buttons & SCE_CTRL_SQUARE) square_pressed = 0;
+
+        if (released_buttons & SCE_CTRL_TRIANGLE) press_count = 0;
+        if (pressed_buttons & SCE_CTRL_TRIANGLE) press_count++;
+        if (press_count > 0) press_count++;
+
+        if (r1_pressed == 1 && square_pressed == 1 && combo1_active == 0) {
+            combo1_active = 1;
+            nativeOnTouch(&jni, NULL, 1, mapping_touch[7].x, mapping_touch[7].y, 20 + mapping_touch[7].sce_button);
+        }
+
+        if (canCallRoach && press_count > 15) {
+            callHorse();
+            press_count = 0;
+        }
+
         for (int i = 0; i < sizeof(mapping_touch) / sizeof(ButtonToTouchMapping); i++) {
             void * instance = Application__GetInstance();
             if (instance == 0) {
@@ -213,11 +247,57 @@ void controls_poll() {
             }
 
             if (pressed_buttons & mapping_touch[i].sce_button) {
-                nativeOnTouch(&jni, NULL, 1, mapping_touch[i].x, mapping_touch[i].y, 10 + mapping_touch[i].sce_button);
+                if (!(combo1_active && (mapping_touch[i].sce_button == SCE_CTRL_SQUARE || mapping_touch[i].sce_button == SCE_CTRL_R1))) {
+                    nativeOnTouch(&jni, NULL, 1, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
+                }
             }
+
             if (released_buttons & mapping_touch[i].sce_button) {
-                nativeOnTouch(&jni, NULL, 0, mapping_touch[i].x, mapping_touch[i].y, 10 + mapping_touch[i].sce_button);
+                if (!(combo1_active && (mapping_touch[i].sce_button == SCE_CTRL_SQUARE || mapping_touch[i].sce_button == SCE_CTRL_R1))) {
+                    nativeOnTouch(&jni, NULL, 0, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
+                }
             }
+        }
+
+        if (pressed_buttons & SCE_CTRL_UP) {
+            nativeOnTouch(&jni, NULL, 1, touchLx_base, touchLy_base, 20 + SCE_CTRL_UP);
+            nativeOnTouch(&jni, NULL, 2, touchLx_base, touchLy_base - touchLy_radius, 20 + SCE_CTRL_UP);
+        }
+
+        if (pressed_buttons & SCE_CTRL_DOWN) {
+            nativeOnTouch(&jni, NULL, 1, touchLx_base, touchLy_base, 20 + SCE_CTRL_DOWN);
+            nativeOnTouch(&jni, NULL, 2, touchLx_base, touchLy_base + touchLy_radius, 20 + SCE_CTRL_DOWN);
+        }
+
+        if (pressed_buttons & SCE_CTRL_LEFT) {
+            nativeOnTouch(&jni, NULL, 1, touchLx_base, touchLy_base, 20 + SCE_CTRL_LEFT);
+            nativeOnTouch(&jni, NULL, 2, touchLx_base - touchLx_radius, touchLy_base, 20 + SCE_CTRL_LEFT);
+        }
+
+        if (pressed_buttons & SCE_CTRL_RIGHT) {
+            nativeOnTouch(&jni, NULL, 1, touchLx_base, touchLy_base, 20 + SCE_CTRL_RIGHT);
+            nativeOnTouch(&jni, NULL, 2, touchLx_base + touchLx_radius, touchLy_base, 20 + SCE_CTRL_RIGHT);
+        }
+
+        if (released_buttons & SCE_CTRL_UP) {
+            nativeOnTouch(&jni, NULL, 0, touchLx_base, touchLy_base, 20 + SCE_CTRL_UP);
+        }
+
+        if (released_buttons & SCE_CTRL_DOWN) {
+            nativeOnTouch(&jni, NULL, 0, touchLx_base, touchLy_base, 20 + SCE_CTRL_DOWN);
+        }
+
+        if (released_buttons & SCE_CTRL_LEFT) {
+            nativeOnTouch(&jni, NULL, 0, touchLx_base, touchLy_base, 20 + SCE_CTRL_LEFT);
+        }
+
+        if (released_buttons & SCE_CTRL_RIGHT) {
+            nativeOnTouch(&jni, NULL, 0, touchLx_base, touchLy_base, 20 + SCE_CTRL_RIGHT);
+        }
+
+        if (combo1_active == 1 && (square_pressed == 0 || r1_pressed == 0)) {
+            combo1_active = 0;
+            nativeOnTouch(&jni, NULL, 0, mapping_touch[7].x, mapping_touch[7].y, 20 + mapping_touch[7].sce_button);
         }
     }
 
@@ -235,16 +315,6 @@ void controls_poll() {
     coord_normalize(&lx, &ly, setting_leftStickDeadZone, 0.8f);
     coord_normalize(&rx, &ry, setting_rightStickDeadZone, 0.9f);
 
-    float touchLx_radius = 75;
-    float touchLy_radius = 75;
-    float touchRx_radius = 36;
-    float touchRy_radius = 36;
-
-    float touchLx_base = 75;
-    float touchLy_base = 462;
-    float touchRx_base = 662;
-    float touchRy_base = 237;
-
     float touchLx = touchLx_base + (touchLx_radius * lx);
     float touchLy = touchLy_base + (touchLy_radius * (ly));
     float touchRx = touchRx_base + (touchRx_radius * rx);
@@ -256,7 +326,7 @@ void controls_poll() {
         rActive = 0;
     }
 
-    if (fabsf(lx) > 0.f || fabsf(ly) > 0.f) {
+    if ((fabsf(lx) > 0.f || fabsf(ly) > 0.f) && !onCannon) {
         lActive = 1;
     } else if (lActive) {
         nativeOnTouch(&jni, NULL, 0, touchLx_last, touchLy_last, fingerIdL+1);
@@ -269,7 +339,7 @@ void controls_poll() {
         rDown = 1;
     }
 
-    if (fabsf(lx) > 0.f || fabsf(ly) > 0.f) {
+    if ((fabsf(lx) > 0.f || fabsf(ly) > 0.f) && !onCannon) {
         if (!lastLActive) {
             nativeOnTouch(&jni, NULL, 1, touchLx_base, touchLy_base, fingerIdL+1);
         }
