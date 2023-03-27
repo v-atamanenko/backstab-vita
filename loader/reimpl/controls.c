@@ -47,24 +47,24 @@ static ButtonMapping mapping[] = {
 };
 
 static ButtonToTouchMapping mapping_touch[] = {
-        { SCE_CTRL_L1,        694, 489 }, // L — Aim // should become x 879 y 531 if we are aiming already
-        { SCE_CTRL_R1,        694, 489 }, // R — Shoot
-        { SCE_CTRL_TRIANGLE,  828, 356 }, // Triangle — Use cannon
-        { SCE_CTRL_SQUARE,    865, 445 }, // Square — Sword
-        { SCE_CTRL_CROSS,     792, 391 }, // X — Jump
+        { SCE_CTRL_L1,        720, 485 }, // L — Aim
+        { SCE_CTRL_R1,        720, 485 }, // R — Shoot
+        { SCE_CTRL_TRIANGLE,  880, 315 }, // Triangle — Use cannon
+        { SCE_CTRL_SQUARE,    862, 486 }, // Square — Sword
+        { SCE_CTRL_CROSS,     770, 381 }, // X — Jump
         { SCE_CTRL_SELECT,    70,  86  }, // Select — Minimap
         { SCE_CTRL_CIRCLE,    913, 355 }, // O — Parry / special attack
 
-        { -1,                 870, 317 }, // R+Square combo
+        { SCE_CTRL_L3,        880, 315 }, // R+Square combo
 };
 
-float touchLx_radius = 78;
-float touchLy_radius = 78;
+float touchLx_radius = 77;
+float touchLy_radius = 77;
 float touchRx_radius = 42;
 float touchRy_radius = 42;
 
-float touchLx_base = 144;
-float touchLy_base = 414;
+float touchLx_base = 121;
+float touchLy_base = 425;
 float touchRx_base = 662;
 float touchRy_base = 237;
 
@@ -124,6 +124,12 @@ void controls_init() {
 
     nativeOnTouch = (void *)so_symbol(&so_mod, "Java_com_gameloft_android_ANMP_GloftSDHM_GameGLSurfaceView_nativeOnTouch");
 }
+
+int combo1_active = 0;
+int r1_pressed = 0;
+int square_pressed = 0;
+
+int press_count = 0;
 
 void controls_poll() {
     SceTouchData touch;
@@ -194,11 +200,15 @@ void controls_poll() {
 
         // L — Aim // changes touch location depending on current state
         if (isInAimMode()) {
-            mapping_touch[0].x = 879;
-            mapping_touch[0].y = 531;
+            mapping_touch[0].x = 863; // L1
+            mapping_touch[0].y = 486; // L1
+            mapping_touch[1].x = 720; // R1
+            mapping_touch[1].y = 480; // R1
         } else {
-            mapping_touch[0].x = 694;
-            mapping_touch[0].y = 489;
+            mapping_touch[0].x = 720; // L1
+            mapping_touch[0].y = 485; // L1
+            mapping_touch[1].x = 720; // R1
+            mapping_touch[1].y = 485; // R1
         }
 
         // R — Shoot // changes touch location depending on current state
@@ -208,17 +218,11 @@ void controls_poll() {
             mapping_touch[2].x = 694; // triangle functions same as L1 here
             mapping_touch[2].y = 489; // triangle functions same as L1 here
         } else {
-            mapping_touch[1].x = 694;
-            mapping_touch[1].y = 489;
-            mapping_touch[2].x = 828;
-            mapping_touch[2].y = 356;
+            mapping_touch[1].x = 720; // R1
+            mapping_touch[1].y = 485; // R1
+            mapping_touch[2].x = 880; // Triangle
+            mapping_touch[2].y = 315; // Triangle
         }
-
-        static int combo1_active = 0;
-        static int r1_pressed = 0;
-        static int square_pressed = 0;
-
-        static int press_count = 0;
 
         if (pressed_buttons & SCE_CTRL_R1) r1_pressed = 1;
         if (released_buttons & SCE_CTRL_R1) r1_pressed = 0;
