@@ -54,7 +54,8 @@ void gl_init() {
     vglAddSemanticBinding("VarEyeVec", 1, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("LightVal1", 2, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("LightVal2", 3, VGL_TYPE_TEXCOORD);
-    
+    vglAddSemanticBinding("VarNormal", 7, VGL_TYPE_TEXCOORD);
+
     vglAddSemanticBinding("VarLightVec", 4, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("Exponent", 5, VGL_TYPE_TEXCOORD);
     vglAddSemanticBinding("SpecularAmbientColor", 6, VGL_TYPE_TEXCOORD);
