@@ -21,6 +21,7 @@ int (*PlayerComponent_CanUseInteractButton)(void * this);
 void (*PlayerComponent_IncrementGrenadeSelection)(void * this, int p);
 void (*PlayerComponent_EnterAimMode)(void * this);
 
+
 void nextGrenade() {
     void * lvl = CLevel__GetLevel();
     if (lvl) {
@@ -110,6 +111,24 @@ void LoadControlScheme(int x) {
     *dpad_open = 1;
 }
 
+so_hook CMapDisplay__Draw_hook;
+
+void * CMapDisplay__Draw(void * this, int p) {
+    int8_t * dpad_open = (int8_t *) so_symbol(&so_mod, "dpad_open");
+    *dpad_open = 0;
+    SO_CONTINUE(void *, CMapDisplay__Draw_hook, this, p);
+    *dpad_open = 1;
+}
+
+so_hook GS_InGameMenu__Render_hook;
+
+void * GS_InGameMenu__Render(void * this) {
+    int8_t * dpad_open = (int8_t *) so_symbol(&so_mod, "dpad_open");
+    *dpad_open = 0;
+    SO_CONTINUE(void *, GS_InGameMenu__Render_hook, this);
+    *dpad_open = 1;
+}
+
 void patch__controls() {
     CLevel__GetLevel = (uintptr_t)so_symbol(&so_mod, "_ZN6CLevel8GetLevelEv");
     CLevel__GetPlayerComponent = (uintptr_t)so_symbol(&so_mod, "_ZN6CLevel18GetPlayerComponentEv");
@@ -129,4 +148,6 @@ void patch__controls() {
     isPressKey = (uintptr_t)so_symbol(&so_mod, "isPressKey");
 
     loadControlScheme_hook = hook_addr((uintptr_t)so_symbol(&so_mod, "_Z17LoadControlSchemei"), (uintptr_t)&LoadControlScheme);
+    CMapDisplay__Draw_hook = hook_addr((uintptr_t)so_symbol(&so_mod, "_ZN11CMapDisplay4DrawEi"), (uintptr_t)&CMapDisplay__Draw);
+    GS_InGameMenu__Render_hook = hook_addr((uintptr_t)so_symbol(&so_mod, "_ZN13GS_InGameMenu6RenderEv"), (uintptr_t)&GS_InGameMenu__Render);
 }
