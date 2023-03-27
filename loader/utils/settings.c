@@ -27,11 +27,11 @@ float setting_viewDistance;
 void settings_reset() {
     setting_leftStickDeadZone = 0.11f;
     setting_rightStickDeadZone = 0.11f;
-    setting_fpsLock = 0;
-    setting_gfxDetail = 1;
-    setting_geometryDetail = 2;
+    setting_fpsLock = 30;
+    setting_gfxDetail = 0;
+    setting_geometryDetail = 0;
     setting_enableMipMaps = false;
-    setting_viewDistance = 1.10f;
+    setting_viewDistance = 0.80f;
 }
 
 void settings_load() {

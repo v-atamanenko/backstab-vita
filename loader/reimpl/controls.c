@@ -278,7 +278,7 @@ void controls_poll() {
 
             if (pressed_buttons & mapping_touch[i].sce_button) {
                 if (!(combo1_active && (mapping_touch[i].sce_button == SCE_CTRL_SQUARE || mapping_touch[i].sce_button == SCE_CTRL_R1))) {
-                    if (isInAimMode() && mapping_touch[i].sce_button == SCE_CTRL_SQUARE) {
+                    if (isInAimMode() && mapping_touch[i].sce_button == SCE_CTRL_TRIANGLE) {
                         nextGrenade();
                     } else {
                         nativeOnTouch(&jni, NULL, 1, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
@@ -288,7 +288,7 @@ void controls_poll() {
 
             if (released_buttons & mapping_touch[i].sce_button) {
                 if (!(combo1_active && (mapping_touch[i].sce_button == SCE_CTRL_SQUARE || mapping_touch[i].sce_button == SCE_CTRL_R1))) {
-                    if (isInAimMode() && mapping_touch[i].sce_button == SCE_CTRL_SQUARE) {
+                    if (isInAimMode() && mapping_touch[i].sce_button == SCE_CTRL_TRIANGLE) {
                         // ignore
                     } else {
                         nativeOnTouch(&jni, NULL, 0, mapping_touch[i].x, mapping_touch[i].y, 20 + mapping_touch[i].sce_button);
