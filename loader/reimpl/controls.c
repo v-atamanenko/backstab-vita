@@ -80,6 +80,7 @@ extern int isOnCannon();
 extern int isOnHorse();
 extern int canCallHorse();
 extern int callHorse();
+extern int canUseVengeance();
 
 extern so_module so_mod;
 
@@ -265,6 +266,13 @@ void controls_poll() {
             if (instance == 0) {
                 log_info("instance is zero, skip");
                 break;
+            }
+
+            if ((mapping_touch[i].sce_button == SCE_CTRL_CIRCLE ||
+                mapping_touch[i].sce_button == SCE_CTRL_TRIANGLE) &&
+                canUseVengeance()) {
+                // if vengeance enabled, ignore circle and triangle
+                continue;
             }
 
             if (pressed_buttons & mapping_touch[i].sce_button) {

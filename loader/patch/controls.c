@@ -16,6 +16,9 @@ int (*PlayerComponent_IsOnCannon)(void * this);
 int (*PlayerComponent_IsOnHorse)(void * this);
 int (*PlayerComponent_CanCallHorse)(void * this);
 int (*PlayerComponent_CallHorse)(void * this);
+int (*PlayerComponent_CanUseVengeance)(void * this);
+int (*PlayerComponent_CanUseInteractButton)(void * this);
+
 
 int isInAimMode() {
     void * lvl = CLevel__GetLevel();
@@ -72,6 +75,21 @@ int isOnHorse() {
     return 0;
 }
 
+int canUseVengeance() {
+    void * lvl = CLevel__GetLevel();
+    if (lvl) {
+        void * pc = CLevel__GetPlayerComponent(lvl);
+        if (pc) {
+            if (PlayerComponent_CanUseVengeance(pc)) {
+                if (!PlayerComponent_CanUseInteractButton(pc)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 so_hook loadControlScheme_hook;
 
 void LoadControlScheme(int x) {
@@ -88,6 +106,8 @@ void patch__controls() {
     PlayerComponent_IsOnHorse = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent9IsOnHorseEv");
     PlayerComponent_CanCallHorse = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent12CanCallHorseEv");
     PlayerComponent_CallHorse = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent9CallHorseEv");
+    PlayerComponent_CanUseVengeance = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent15CanUseVengeanceEv");
+    PlayerComponent_CanUseInteractButton = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent20CanUseInteractButtonEv");
 
     CheckInputKey = (uintptr_t)so_symbol(&so_mod, "_Z13CheckInputKeyi17EVENT_ACTION_TYPEii");
     AbsorbKey = (uintptr_t)so_symbol(&so_mod, "_Z9AbsorbKeyi");
