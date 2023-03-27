@@ -77,6 +77,7 @@ extern void * (*Application__GetInstance)();
 extern int * isPressKey;
 extern int isInAimMode();
 extern int isOnCannon();
+extern int isOnHorse();
 extern int canCallHorse();
 extern int callHorse();
 
@@ -158,6 +159,7 @@ void controls_poll() {
 
     int onCannon = isOnCannon();
     int canCallRoach = canCallHorse();
+    int isOnRoach = isOnHorse();
 
     SceCtrlData pad;
     sceCtrlPeekBufferPositiveExt2(0, &pad, 1);
@@ -198,6 +200,19 @@ void controls_poll() {
             }
         }
 
+        // switch square-triangle bindings while on horse
+        if (isOnRoach) {
+            mapping_touch[2].x = 862; // triangle
+            mapping_touch[2].y = 486; // triangle
+            mapping_touch[3].x = 880; // square
+            mapping_touch[3].y = 315; // square
+        } else {
+            mapping_touch[2].x = 880; // triangle
+            mapping_touch[2].y = 315; // triangle
+            mapping_touch[3].x = 862; // square
+            mapping_touch[3].y = 486; // square
+        }
+
         // L — Aim // changes touch location depending on current state
         if (isInAimMode()) {
             mapping_touch[0].x = 863; // L1
@@ -220,8 +235,10 @@ void controls_poll() {
         } else {
             mapping_touch[1].x = 720; // R1
             mapping_touch[1].y = 485; // R1
-            mapping_touch[2].x = 880; // Triangle
-            mapping_touch[2].y = 315; // Triangle
+            if (!isOnRoach) {
+                mapping_touch[2].x = 880; // Triangle
+                mapping_touch[2].y = 315; // Triangle}
+            }
         }
 
         if (pressed_buttons & SCE_CTRL_R1) r1_pressed = 1;

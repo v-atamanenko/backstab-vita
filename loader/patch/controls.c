@@ -13,6 +13,7 @@ void * (*CLevel__GetLevel)();
 void * (*CLevel__GetPlayerComponent)(void * this);
 int (*PlayerComponent_IsInAimMode)(void * this);
 int (*PlayerComponent_IsOnCannon)(void * this);
+int (*PlayerComponent_IsOnHorse)(void * this);
 int (*PlayerComponent_CanCallHorse)(void * this);
 int (*PlayerComponent_CallHorse)(void * this);
 
@@ -60,6 +61,17 @@ int callHorse() {
     return 0;
 }
 
+int isOnHorse() {
+    void * lvl = CLevel__GetLevel();
+    if (lvl) {
+        void * pc = CLevel__GetPlayerComponent(lvl);
+        if (pc) {
+            return PlayerComponent_IsOnHorse(pc);
+        }
+    }
+    return 0;
+}
+
 so_hook loadControlScheme_hook;
 
 void LoadControlScheme(int x) {
@@ -73,6 +85,7 @@ void patch__controls() {
     CLevel__GetPlayerComponent = (uintptr_t)so_symbol(&so_mod, "_ZN6CLevel18GetPlayerComponentEv");
     PlayerComponent_IsInAimMode = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent11IsInAimModeEv");
     PlayerComponent_IsOnCannon = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent10IsOnCannonEv");
+    PlayerComponent_IsOnHorse = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent9IsOnHorseEv");
     PlayerComponent_CanCallHorse = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent12CanCallHorseEv");
     PlayerComponent_CallHorse = (uintptr_t)so_symbol(&so_mod, "_ZN15PlayerComponent9CallHorseEv");
 
